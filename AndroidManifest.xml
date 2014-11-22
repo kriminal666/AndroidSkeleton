@@ -19,7 +19,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
+             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -28,10 +28,16 @@
         </activity>
         <activity
             android:name="com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1.MainActivity"
-            android:label="@string/title_activity_main"/>
+            android:label="@string/title_activity_main"
+            android:parentActivityName="com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1.SplashActivity">
+            </activity>
          <activity
             android:name="com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1.LoginSuccess"
-            android:label="@string/title_activity_main"/>
+            android:label="@string/title_activity_main"
+            android:parentActivityName="com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1.MainActivity"/>
+         <meta-data 
+             android:name="com.facebook.sdk.ApplicationId" 
+             android:value="@string/facebook_app_id"/>
     </application>
     
     <!-- Permission - Internet Connect -->
