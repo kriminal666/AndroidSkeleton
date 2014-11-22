@@ -38,12 +38,15 @@ import android.widget.Toast;
 
 
 
+
+
 public class MainActivity extends Activity {
 	//BEGIN FACEBOOK
 	// Your Facebook APP ID
 		private static String APP_ID = "714569478638464"; // Replace with your App ID
 
 		// Instance of Facebook Class
+		@SuppressWarnings("deprecation")
 		private Facebook facebook = new Facebook(APP_ID);
 		private AsyncFacebookRunner mAsyncRunner;
 		String FILENAME = "AndroidSSO_data";
@@ -97,7 +100,6 @@ public class MainActivity extends Activity {
 
 	
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -115,9 +117,10 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				Log.d("Image Button", "button Clicked");
-				loginToFacebook();
+				 loginToFacebook();
 			}
 		});
+		
 		
 		
 		
@@ -253,11 +256,6 @@ public class MainActivity extends Activity {
 							editor.putLong("access_expires",
 									facebook.getAccessExpires());
 							editor.commit();
-
-							// Making Login button invisible
-							btnFbLogin.setVisibility(View.INVISIBLE);
-
-						;
 						}
 
 						@Override
@@ -274,6 +272,7 @@ public class MainActivity extends Activity {
 
 					});
 		}
+		
 	}
 	@SuppressWarnings("deprecation")
 	@Override
@@ -347,10 +346,12 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 	}
+	
     //LOG OUT FROM FACEBOOK
 	/**
 	 * Function to Logout user from Facebook
 	 * */
+	
 	@SuppressWarnings("deprecation")
 	public void logoutFromFacebook() {
 		mAsyncRunner.logout(this, new RequestListener() {
@@ -392,93 +393,5 @@ public class MainActivity extends Activity {
 	}
 	//END LOGOUT FACEBOOK
 
-	/**
-	 * Get Profile information by making request to Facebook Graph API
-	 * */
-	@SuppressWarnings("deprecation")
-	public void getProfileInformation() {
-		mAsyncRunner.request("me", new RequestListener() {
-			@Override
-			public void onComplete(String response, Object state) {
-				Log.d("Profile", response);
-				String json = response;
-				try {
-					// Facebook Profile JSON data
-					JSONObject profile = new JSONObject(json);
-					
-					// getting name of the user
-					final String name = profile.getString("name");
-					
-					// getting email of the user
-					final String email = profile.getString("email");
-					
-					runOnUiThread(new Runnable() {
-
-						@Override
-						public void run() {
-							Toast.makeText(getApplicationContext(), "Name: " + name + "\nEmail: " + email, Toast.LENGTH_LONG).show();
-						}
-
-					});
-
-					
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
-
-			@Override
-			public void onIOException(IOException e, Object state) {
-			}
-
-			@Override
-			public void onFileNotFoundException(FileNotFoundException e,
-					Object state) {
-			}
-
-			@Override
-			public void onMalformedURLException(MalformedURLException e,
-					Object state) {
-			}
-
-			@Override
-			public void onFacebookError(FacebookError e, Object state) {
-			}
-		});
-	}
-	/**
-	 * Function to post to facebook wall
-	 * */
-	@SuppressWarnings("deprecation")
-	public void postToWall() {
-		// post on user's wall.
-		facebook.dialog(this, "feed", new DialogListener() {
-
-			@Override
-			public void onFacebookError(FacebookError e) {
-			}
-
-			@Override
-			public void onError(DialogError e) {
-			}
-
-			@Override
-			public void onComplete(Bundle values) {
-			}
-
-			@Override
-			public void onCancel() {
-			}
-		});
-
-	}
-	/**
-	 * Function to show Access Tokens
-	 * */
-	public void showAccessTokens() {
-		String access_token = facebook.getAccessToken();
-
-		Toast.makeText(getApplicationContext(),
-				"Access Token: " + access_token, Toast.LENGTH_LONG).show();
-	}
+	
 }
