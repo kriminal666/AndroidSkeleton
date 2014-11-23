@@ -24,6 +24,7 @@ import twitter4j.conf.ConfigurationBuilder;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.IntentSender.SendIntentException;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
@@ -31,16 +32,27 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.plus.Plus;
+import com.google.android.gms.plus.model.people.Person;
 
 
 
-
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnClickListener,ConnectionCallbacks,OnConnectionFailedListener {
 	//BEGIN FACEBOOK
 	// Your Facebook APP ID
 		private static String APP_ID = "714569478638464"; // Replace with your App ID
@@ -97,8 +109,27 @@ public class MainActivity extends Activity {
 	// Alert Dialog Manager
 	AlertDialogManager alert = new AlertDialogManager();
 	//END TWITTER CAMPS
+	//BEGIN GOOGLE CAMPS
+	private static final int RC_SIGN_IN = 0;
+	// Logcat tag
+	private static final String TAG = "MainActivity";
+    
 
+	// Google client to interact with Google API
+	private GoogleApiClient mGoogleApiClient;
+	/**
+	 * A flag indicating that a PendingIntent is in progress and prevents us
+	 * from starting further intents.
+	 */
+	private boolean mIntentInProgress;
+
+	private boolean mSignInClicked;
+
+	private ConnectionResult mConnectionResult;
+    //we need just one button
+	private SignInButton btnSignIn;
 	
+	//END GOOGLE CAMPS
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -120,10 +151,14 @@ public class MainActivity extends Activity {
 				 loginToFacebook();
 			}
 		});
-		
-		
-		
-		
+		//END FACEBOOK CLICK
+		//GOOGLE CONTROLS
+		btnSignIn = (SignInButton) findViewById(R.id.btnGplus);
+		btnSignIn.setOnClickListener(this);
+		mGoogleApiClient = new GoogleApiClient.Builder(this)
+		.addConnectionCallbacks(this)
+		.addOnConnectionFailedListener(this).addApi(Plus.API)
+		.addScope(Plus.SCOPE_PLUS_LOGIN).build();
 		//BEGIN TWITER CODE
 
 		if (android.os.Build.VERSION.SDK_INT > 9) {
@@ -213,6 +248,140 @@ public class MainActivity extends Activity {
 			}
 		}
 
+	}//End of method onCreate
+	//GOOGLE METHODS
+	protected void onStart() {
+		super.onStart();
+		mGoogleApiClient.connect();
+	}
+
+	protected void onStop() {
+		super.onStop();
+		if (mGoogleApiClient.isConnected()) {
+			mGoogleApiClient.disconnect();
+		}
+	}
+	/**
+	 * Method to resolve any sign in errors
+	 * */
+	private void resolveSignInError() {
+		if (mConnectionResult.hasResolution()) {
+			try {
+				mIntentInProgress = true;
+				mConnectionResult.startResolutionForResult(this, RC_SIGN_IN);
+			} catch (SendIntentException e) {
+				mIntentInProgress = false;
+				mGoogleApiClient.connect();
+			}
+		}
+	}
+	@Override
+	public void onConnectionFailed(ConnectionResult result) {
+		if (!result.hasResolution()) {
+			GooglePlayServicesUtil.getErrorDialog(result.getErrorCode(), this,
+					0).show();
+			return;
+		}
+
+		if (!mIntentInProgress) {
+			// Store the ConnectionResult for later usage
+			mConnectionResult = result;
+
+			if (mSignInClicked) {
+				// The user has already clicked 'sign-in' so we attempt to
+				// resolve all
+				// errors until the user is signed in, or they cancel.
+				resolveSignInError();
+			}
+		}
+	}
+	//This is used by google and facebook
+	/*
+	@Override
+	protected void onActivityResult(int requestCode, int responseCode,
+			Intent intent) {
+		if (requestCode == RC_SIGN_IN) {
+			if (responseCode != RESULT_OK) {
+				mSignInClicked = false;
+			}
+
+			mIntentInProgress = false;
+
+			if (!mGoogleApiClient.isConnecting()) {
+				mGoogleApiClient.connect();
+			}
+		}
+	}*/
+	@Override
+	public void onConnected(Bundle arg0) {
+		mSignInClicked = false;
+		Toast.makeText(this, "User is connected!", Toast.LENGTH_LONG).show();
+
+		// Get user's information
+		//wE DON NEED THIS RIGHT NOW
+		//getProfileInformation();
+
+		// Update the UI after signin
+		updateUI(true);
+
+	}
+	/**
+	 * Updating the UI, showing/hiding buttons and profile layout
+	 *aCTIONS TO DO ONCE WE ARE SIGN IN
+	 * */
+	private void updateUI(boolean isSignedIn) {
+		if (isSignedIn) {
+			Intent googleLogin = new Intent(MainActivity.this,LoginSuccess.class);
+			startActivity(googleLogin);
+
+		} else {
+			btnSignIn.setVisibility(View.VISIBLE);
+	
+		}
+	}
+	@Override
+	public void onConnectionSuspended(int arg0) {
+		mGoogleApiClient.connect();
+		updateUI(false);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.activity_main, menu);
+		return true;
+	}
+	/**
+	 * Button on click listener
+	 * */
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btnGplus:
+			// Sign in button clicked
+			signInWithGplus();
+			break;
+		}
+	}
+	/**
+	 * Sign-in into google
+	 * */
+	private void signInWithGplus() {
+		if (!mGoogleApiClient.isConnecting()) {
+			mSignInClicked = true;
+			resolveSignInError();
+		}
+	}
+	/**
+	 * Sign-out from google
+	 * */
+	private void signOutFromGplus() {
+		if (mGoogleApiClient.isConnected()) {
+			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+			mGoogleApiClient.disconnect();
+			mGoogleApiClient.connect();
+			updateUI(false);
+		}
 	}
 	//LOGIN FACEBOOK
 	/**
@@ -277,6 +446,19 @@ public class MainActivity extends Activity {
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		//For google
+		if (requestCode == RC_SIGN_IN) {
+			if (resultCode != RESULT_OK) {
+				mSignInClicked = false;
+			}
+
+			mIntentInProgress = false;
+
+			if (!mGoogleApiClient.isConnecting()) {
+				mGoogleApiClient.connect();
+			}
+		}
+		//for facebook
 		super.onActivityResult(requestCode, resultCode, data);
 		facebook.authorizeCallback(requestCode, resultCode, data);
 	}

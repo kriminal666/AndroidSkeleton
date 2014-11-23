@@ -21,17 +21,15 @@
         android:orientation="vertical"
         android:padding="10dp" >
 
-        <Button
+        <com.google.android.gms.common.SignInButton
             android:id="@+id/btnGplus"
-            style="@style/ButtonText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
-            android:background="@drawable/layers_gplus_button_bg"
-            android:paddingBottom="10dp"
-            android:paddingLeft="30dp"
-            android:paddingRight="10dp"
-            android:paddingTop="10dp"
+            android:paddingBottom="0dp"
+            android:paddingLeft="0dp"
+            android:paddingRight="0dp"
+            android:paddingTop="0dp"
             android:text="@string/google" />
 
         <Button

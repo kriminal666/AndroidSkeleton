@@ -15,7 +15,7 @@ public class LoginSuccess extends Activity{
 		 //GET LOGOUT BUTTON
         Button btnLogout = (Button) findViewById(R.id.btnLogout);
         //Create listener
-        btnLogout.setOnClickListener(new View.OnClickListener() {
+        /*btnLogout.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
@@ -31,7 +31,7 @@ public class LoginSuccess extends Activity{
                 }
 
             }
-        });
+        });*/
 	}
 	
 	
