@@ -322,7 +322,9 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 		//getProfileInformation();
 
 		// Update the UI after signin
-		updateUI(true);
+		Toast.makeText(this, "Before", Toast.LENGTH_LONG).show();
+		updateUI(true);		
+		Toast.makeText(this, "After", Toast.LENGTH_LONG).show();
 
 	}
 	/**
@@ -330,11 +332,15 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 	 *aCTIONS TO DO ONCE WE ARE SIGN IN
 	 * */
 	private void updateUI(boolean isSignedIn) {
+		Toast.makeText(this, "updateUI", Toast.LENGTH_LONG).show();
 		if (isSignedIn) {
+			Toast.makeText(this, "Xivato 1", Toast.LENGTH_LONG).show();
 			Intent googleLogin = new Intent(MainActivity.this,LoginSuccess.class);
+			Toast.makeText(this, "Xivato 2", Toast.LENGTH_LONG).show();
 			startActivity(googleLogin);
-
+			Toast.makeText(this, "Xivato 2,5", Toast.LENGTH_LONG).show();
 		} else {
+			Toast.makeText(this, "Xivato 3", Toast.LENGTH_LONG).show();
 			btnSignIn.setVisibility(View.VISIBLE);
 	
 		}

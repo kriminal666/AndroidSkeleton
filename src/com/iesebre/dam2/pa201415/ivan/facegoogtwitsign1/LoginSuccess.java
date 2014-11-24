@@ -11,7 +11,7 @@ public class LoginSuccess extends Activity{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.loginsuccess);
 		 //GET LOGOUT BUTTON
         Button btnLogout = (Button) findViewById(R.id.btnLogout);
         //Create listener

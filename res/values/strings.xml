@@ -1,10 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">FaceGoogTwitSign1</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
-        <string name="google">Sign in with Google+</string>
+    <string name="google">Sign in with Google+</string>
     <string name="facebook">Sign in with Facebook</string>
     <string name="twitter">Sign in with Twitter</string>
     <string name="splashtxt">Cargando la aplicación, espere por favor.</string>
@@ -47,6 +48,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example">Example action</string>
     <string name="facebook_app_id">714569478638464</string>
-
+    <string name="title_activity_main_activity_drawer">MainActivityDrawer</string>
+    <string name="action_settings">Settings</string>
 
 </resources>
