@@ -238,7 +238,7 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
-                    Intent login = new Intent(MainActivity.this,LoginSuccess.class);
+                    Intent login = new Intent(MainActivity.this,MainActivityDrawer.class);
                      startActivity(login);
 						
 				} catch (Exception e) {
@@ -335,7 +335,7 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 		Toast.makeText(this, "updateUI", Toast.LENGTH_LONG).show();
 		if (isSignedIn) {
 			Toast.makeText(this, "Xivato 1", Toast.LENGTH_LONG).show();
-			Intent googleLogin = new Intent(MainActivity.this,LoginSuccess.class);
+			Intent googleLogin = new Intent(MainActivity.this,MainActivityDrawer.class);
 			Toast.makeText(this, "Xivato 2", Toast.LENGTH_LONG).show();
 			startActivity(googleLogin);
 			Toast.makeText(this, "Xivato 2,5", Toast.LENGTH_LONG).show();
@@ -499,7 +499,7 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 			// Hide login button
 			  //Creamos un intent para mandarlo a la actividad correspondiente
 
-			Intent stillLogged = new Intent(MainActivity.this,LoginSuccess.class);
+			Intent stillLogged = new Intent(MainActivity.this,MainActivityDrawer.class);
 	        startActivity(stillLogged);
           
 

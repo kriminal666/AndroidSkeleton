@@ -6,6 +6,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivityDrawer extends ActionBarActivity implements
@@ -45,6 +47,26 @@ public class MainActivityDrawer extends ActionBarActivity implements
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
+		 //GET LOGOUT BUTTON
+        Button btnLogout = (Button) findViewById(R.id.btnLogout);
+        //Create listener
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                //VERIFY WHERE ARE CONNECTED (need import MainActivity class)
+                if (MainActivity.isTwitterLoggedInAlready()) {
+                    // user already logged into twitter
+                    //Call logout.
+                    MainActivity.logoutFromTwitter();
+                    //return to login page
+                    Intent logoutTwitter = new Intent(MainActivityDrawer.this,MainActivity.class);
+                    startActivity(logoutTwitter);
+
+                }
+
+            }
+        });
 	}
 
 	@Override

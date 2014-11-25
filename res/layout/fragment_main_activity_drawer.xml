@@ -8,9 +8,24 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1.MainActivityDrawer$PlaceholderFragment" >
 
-    <TextView
-        android:id="@+id/section_label"
+   <TextView android:id="@+id/section_label"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="LOGIN SUCCESS"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:textSize="32sp"/>
+    <Button android:id="@+id/btnLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Logout"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:paddingBottom="3dp"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+
+        style="@style/ButtonText2"/>
 
 </RelativeLayout>
