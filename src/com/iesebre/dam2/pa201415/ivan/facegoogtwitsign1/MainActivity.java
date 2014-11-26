@@ -116,7 +116,7 @@ public class MainActivity extends Activity implements OnClickListener,Connection
     
 
 	// Google client to interact with Google API
-	private GoogleApiClient mGoogleApiClient;
+	private   GoogleApiClient mGoogleApiClient;
 	/**
 	 * A flag indicating that a PendingIntent is in progress and prevents us
 	 * from starting further intents.
@@ -238,9 +238,8 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
-                    Intent login = new Intent(MainActivity.this,MainActivityDrawer.class);
-                     startActivity(login);
-						
+                    Intent loginTwitter = new Intent(MainActivity.this,MainActivityDrawer.class);
+					startActivity(loginTwitter);	
 				} catch (Exception e) {
 					// Check log for login errors
 					Log.e("Twitter Login Error", "> " + e.getMessage());
