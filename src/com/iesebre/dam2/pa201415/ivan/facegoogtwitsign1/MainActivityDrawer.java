@@ -1,16 +1,20 @@
 package com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1;
 
+
 import com.google.android.gms.plus.Plus;
 
 import android.app.Activity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,9 +26,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
-
+//implements our personal fragment
 public class MainActivityDrawer extends ActionBarActivity implements
-		NavigationDrawerFragment.NavigationDrawerCallbacks,OnClickListener {
+		NavigationDrawerFragment.NavigationDrawerCallbacks,FragmentPersonal1.OnFragmentInteractionListener {
 
 	/**
 	 * Fragment managing the behaviors, interactions and presentation of the
@@ -50,32 +54,8 @@ public class MainActivityDrawer extends ActionBarActivity implements
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
-		 
-		
-		
-		
-		//GET LOGOUT BUTTON
-        Button btnLogoutGoogle = (Button) findViewById(R.id.btnLogout);
-        //Create listener
-        //PUTA LINEA NO LE SALE DE LOS COJONES DE FUNCIONAR
-         btnLogoutGoogle.setOnClickListener(this);
-        //HASTA QUE NO CARGA FRAGMENT_MAIN_ACTIVITY_DRAWER EL BOTÓN NO EXISTE Y LA CADENA DA NULL Y REVIENTA
-           
-
-            
-       
-	}
-	/**
-	 * Sign-out from google
-	 * */
-	public void signOutFromGplus() {
-		if (MainActivity.mGoogleApiClient.isConnected()) {
-			Plus.AccountApi.clearDefaultAccount(MainActivity.mGoogleApiClient);
-			MainActivity.mGoogleApiClient.disconnect();
-			MainActivity.mGoogleApiClient.connect();
-			//MainActivity.updateUI(false);
 		}
-	}
+
 
 	@Override
 	public void onNavigationDrawerItemSelected(int position) {
@@ -85,7 +65,37 @@ public class MainActivityDrawer extends ActionBarActivity implements
 				.beginTransaction()
 				.replace(R.id.container,
 						PlaceholderFragment.newInstance(position + 1)).commit();
-	}
+		      //Load fragment when section selected
+		      Fragment fragment = null;
+		      switch (position)
+			   {
+			     case 0:
+			    	 //When section select load our personal fragment
+			        fragment = (Fragment) new FragmentPersonal1();
+			        break;
+			     case 1:
+			    	 Log.w(this.getClass().getSimpleName(), "Section 1");
+	
+			        break;
+			     case 2:
+			    	 Log.w(this.getClass().getSimpleName(), "Section 2");
+			        break;
+			     default:
+			        Log.w(this.getClass().getSimpleName(), "Reached Default in onNavigationDrawerItemSelected!");
+			        break;
+			  }
+		    //Código que se repetirá para otros fragmentos
+		      if (fragment != null)
+			  {
+			     FragmentTransaction ft = fragmentManager.beginTransaction();
+			     ft.replace(R.id.container, fragment);
+			     ft.addToBackStack(null);
+			     ft.commit();
+			     //mTitle = getString(((GetActionBarTitle) fragment).getActionBarTitleId());
+			     mTitle = "LOGOUT";
+			     restoreActionBar();
+			  }		
+		}
 
 	public void onSectionAttached(int number) {
 		switch (number) {
@@ -173,15 +183,11 @@ public class MainActivityDrawer extends ActionBarActivity implements
 		}
 	}
 
+	
 	@Override
-	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.btnLogout:
-		signOutFromGplus();
-		Intent logoutGoogle= new Intent (MainActivityDrawer.this,MainActivity.class);
-		startActivity(logoutGoogle);
-		break;
-		}
+	public void onFragmentInteraction(Uri uri) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	
