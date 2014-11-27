@@ -2,11 +2,13 @@ package com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1;
 
 import com.google.android.gms.plus.Plus;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,28 +122,21 @@ public class FragmentPersonal1 extends Fragment implements View.OnClickListener 
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.btnLogout:
-		signOutFromGplus();
-		if(!MainActivity.mGoogleApiClient.isConnected()){
-			//special intent for fragment
-			 Intent logoutAll = new Intent(getActivity(), MainActivity.class);
-		        startActivity(logoutAll);
+			 LoginActivity login;
+			 MainActivityDrawer drawer = new MainActivityDrawer();
+			 Intent logoutAll = new Intent();
+			 
+		    getActivity().setResult(9999,logoutAll);
+		     drawer.finish(); 
+		 	break;
 		}
 	
 		
-		break;
+	
 		}// TODO Auto-generated method stub
 		
 	}
-	/**
-	 * Sign-out from google
-	 * */
-	public void signOutFromGplus() {
-		if (MainActivity.mGoogleApiClient.isConnected()) {
-			Plus.AccountApi.clearDefaultAccount(MainActivity.mGoogleApiClient);
-			MainActivity.mGoogleApiClient.disconnect();
-			MainActivity.mGoogleApiClient.connect();
+	
+	
 
-		}
-	}
 
-}

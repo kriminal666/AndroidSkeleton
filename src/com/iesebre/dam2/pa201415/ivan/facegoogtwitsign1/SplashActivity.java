@@ -31,7 +31,7 @@ public class SplashActivity extends Activity {
             	
                 // llamar a la pantalla de login
                 Intent mainIntent = new Intent().setClass(
-                        SplashActivity.this, MainActivity.class);
+                        SplashActivity.this, LoginActivity.class);
                 startActivity(mainIntent);
             	
                 //Cerramos la actividad de manera que no se pueda volver atrás

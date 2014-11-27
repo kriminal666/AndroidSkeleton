@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MainActivity"
+    tools:context=".LoginActivity"
 
     android:background="@drawable/balloon_bg">
 
@@ -21,6 +21,7 @@
         android:orientation="vertical"
         android:padding="10dp" >
 
+        <!---
         <com.google.android.gms.common.SignInButton
             android:id="@+id/btnGplus"
             android:layout_width="match_parent"
@@ -30,6 +31,19 @@
             android:paddingLeft="0dp"
             android:paddingRight="0dp"
             android:paddingTop="0dp"
+            android:text="@string/google" /> -->
+        
+        <Button
+            android:id="@+id/btnGplus"
+            style="@style/ButtonText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:background="@drawable/layers_gplus_button_bg"
+            android:paddingBottom="10dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
             android:text="@string/google" />
 
         <Button
@@ -89,7 +103,7 @@
         </EditText>
 
         <EditText
-            android:layout_width="238dp"
+            android:layout_width="262dp"
             android:layout_height="match_parent"
             android:hint="ENTER PASSWORD"
             android:inputType="textPassword"

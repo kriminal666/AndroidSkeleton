@@ -52,7 +52,7 @@ import com.google.android.gms.plus.model.people.Person;
 
 
 
-public class MainActivity extends Activity implements OnClickListener,ConnectionCallbacks,OnConnectionFailedListener {
+public class LoginActivity extends Activity implements OnClickListener,ConnectionCallbacks,OnConnectionFailedListener {
 	//BEGIN FACEBOOK
 	// Your Facebook APP ID
 		private static String APP_ID = "714569478638464"; // Replace with your App ID
@@ -127,7 +127,8 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 
 	private ConnectionResult mConnectionResult;
     //we need just one button
-	private SignInButton btnSignIn;
+	//private SignInButton btnSignIn;
+	private Button btnSignIn;
 	
 	//END GOOGLE CAMPS
 
@@ -153,7 +154,7 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 		});
 		//END FACEBOOK CLICK
 		//GOOGLE CONTROLS
-		btnSignIn = (SignInButton) findViewById(R.id.btnGplus);
+		btnSignIn = (Button) findViewById(R.id.btnGplus);
 		btnSignIn.setOnClickListener(this);
 		mGoogleApiClient = new GoogleApiClient.Builder(this)
 		.addConnectionCallbacks(this)
@@ -174,7 +175,7 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 		// Check if Internet present
 		if (!cd.isConnectingToInternet()) {
 			// Internet Connection is not present
-			alert.showAlertDialog(MainActivity.this, "Internet Connection Error",
+			alert.showAlertDialog(LoginActivity.this, "Internet Connection Error",
 					"Please connect to working Internet connection", false);
 			// stop executing code by return
 			return;
@@ -183,7 +184,7 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 		// Check if twitter keys are set
 		if(TWITTER_CONSUMER_KEY.trim().length() == 0 || TWITTER_CONSUMER_SECRET.trim().length() == 0){
 			// Internet Connection is not present
-			alert.showAlertDialog(MainActivity.this, "Twitter oAuth tokens", "Please set your twitter oauth tokens first!", false);
+			alert.showAlertDialog(LoginActivity.this, "Twitter oAuth tokens", "Please set your twitter oauth tokens first!", false);
 			// stop executing code by return
 			return;
 		}
@@ -238,7 +239,7 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
-                    Intent loginTwitter = new Intent(MainActivity.this,MainActivityDrawer.class);
+                    Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
 					startActivity(loginTwitter);	
 				} catch (Exception e) {
 					// Check log for login errors
@@ -334,9 +335,9 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 		Toast.makeText(this, "updateUI", Toast.LENGTH_LONG).show();
 		if (isSignedIn) {
 			
-			Intent googleLogin = new Intent(MainActivity.this,MainActivityDrawer.class);
+			Intent googleLogin = new Intent(LoginActivity.this,MainActivityDrawer.class);
 			
-			startActivity(googleLogin);
+			startActivityForResult(googleLogin, 1);
 			
 		} else {
 			
@@ -498,7 +499,7 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 			// Hide login button
 			  //Creamos un intent para mandarlo a la actividad correspondiente
 
-			Intent stillLogged = new Intent(MainActivity.this,MainActivityDrawer.class);
+			Intent stillLogged = new Intent(LoginActivity.this,MainActivityDrawer.class);
 	        startActivity(stillLogged);
           
 
