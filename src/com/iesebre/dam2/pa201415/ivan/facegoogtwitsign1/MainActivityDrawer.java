@@ -1,5 +1,7 @@
 package com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1;
 
+import com.google.android.gms.plus.Plus;
+
 import android.app.Activity;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -14,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
@@ -21,7 +24,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivityDrawer extends ActionBarActivity implements
-		NavigationDrawerFragment.NavigationDrawerCallbacks {
+		NavigationDrawerFragment.NavigationDrawerCallbacks,OnClickListener {
 
 	/**
 	 * Fragment managing the behaviors, interactions and presentation of the
@@ -47,23 +50,31 @@ public class MainActivityDrawer extends ActionBarActivity implements
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
-		 //GET LOGOUT BUTTON
-        Button btnLogout = (Button) findViewById(R.id.btnLogout);
+		 
+		
+		
+		
+		//GET LOGOUT BUTTON
+        Button btnLogoutGoogle = (Button) findViewById(R.id.btnLogout);
         //Create listener
-       /*btnLogout.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-            	
-                //VERIFY WHERE ARE CONNECTED (need import MainActivity class)
-            	    MainActivity.signOutFromGplus();
-                    Intent logoutTwitter = new Intent(MainActivityDrawer.this,MainActivity.class);
-                    startActivity(logoutTwitter);
-
-                }
+        //PUTA LINEA NO LE SALE DE LOS COJONES DE FUNCIONAR
+         btnLogoutGoogle.setOnClickListener(this);
+        //HASTA QUE NO CARGA FRAGMENT_MAIN_ACTIVITY_DRAWER EL BOTÓN NO EXISTE Y LA CADENA DA NULL Y REVIENTA
+           
 
             
-        });*/
+       
+	}
+	/**
+	 * Sign-out from google
+	 * */
+	public void signOutFromGplus() {
+		if (MainActivity.mGoogleApiClient.isConnected()) {
+			Plus.AccountApi.clearDefaultAccount(MainActivity.mGoogleApiClient);
+			MainActivity.mGoogleApiClient.disconnect();
+			MainActivity.mGoogleApiClient.connect();
+			//MainActivity.updateUI(false);
+		}
 	}
 
 	@Override
@@ -161,5 +172,18 @@ public class MainActivityDrawer extends ActionBarActivity implements
 					.getInt(ARG_SECTION_NUMBER));
 		}
 	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btnLogout:
+		signOutFromGplus();
+		Intent logoutGoogle= new Intent (MainActivityDrawer.this,MainActivity.class);
+		startActivity(logoutGoogle);
+		break;
+		}
+	}
+
+	
 
 }

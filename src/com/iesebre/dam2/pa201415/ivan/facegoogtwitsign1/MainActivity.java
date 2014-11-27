@@ -116,7 +116,7 @@ public class MainActivity extends Activity implements OnClickListener,Connection
     
 
 	// Google client to interact with Google API
-	private   GoogleApiClient mGoogleApiClient;
+	protected static   GoogleApiClient mGoogleApiClient;
 	/**
 	 * A flag indicating that a PendingIntent is in progress and prevents us
 	 * from starting further intents.
@@ -380,7 +380,7 @@ public class MainActivity extends Activity implements OnClickListener,Connection
 	/**
 	 * Sign-out from google
 	 * */
-	private void signOutFromGplus() {
+	public void signOutFromGplus() {
 		if (mGoogleApiClient.isConnected()) {
 			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
 			mGoogleApiClient.disconnect();
