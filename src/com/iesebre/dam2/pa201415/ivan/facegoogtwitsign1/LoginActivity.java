@@ -63,6 +63,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		private AsyncFacebookRunner mAsyncRunner;
 		String FILENAME = "AndroidSSO_data";
 		private SharedPreferences mPrefs;
+		private String FACEBOOK_LOGIN = "Facebook_Login";
 		//FACEBOOK BUTTON
 		Button btnFbLogin;
 		//END FACEBOOK CAMPS
@@ -129,7 +130,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
     //we need just one button
 	//private SignInButton btnSignIn;
 	private Button btnSignIn;
-	
+	//Our own shared for google.
+	private  static SharedPreferences sharedPrefsGoogle;
+	private String GOOGLE_LOGIN = "Google_Login";
 	//END GOOGLE CAMPS
 
 	@Override
@@ -321,7 +324,15 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		// Get user's information
 		//wE DON NEED THIS RIGHT NOW
 		//getProfileInformation();
-
+		//Shared Preferences de google Personales
+		sharedPrefsGoogle = getSharedPreferences("google_logout", 0);
+		 Editor edit = sharedPrefsGoogle.edit();
+		 edit.putBoolean(GOOGLE_LOGIN, true);
+		 edit.commit();
+		 
+	
+		
+		
 		// Update the UI after signin
 		Log.d("Logout"," función onConnected Antes de llamar a updateUI");
 		Log.d("Logout","Valor de mGoogleApiClient: "+mGoogleApiClient.isConnected());
@@ -386,8 +397,10 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * Sign-out from google
 	 */
 	public void signOutFromGplus() {
-		Log.d("Logout", "llega al signout");
-		if (mGoogleApiClient.isConnected()) {
+		Log.d("Logout", "llega al signout "+sharedPrefsGoogle.getBoolean(GOOGLE_LOGIN,false));
+		
+		Log.d("Logout","Valor "+mGoogleApiClient.isConnected());
+		if (sharedPrefsGoogle.getBoolean(GOOGLE_LOGIN,false)) {
 			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
 			mGoogleApiClient.disconnect();
 			mGoogleApiClient.connect();
@@ -479,8 +492,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		}
 		Log.d("Logout","Valor de la variable mGoogleApiClient en onActivityResult1: "+mGoogleApiClient.isConnected());
 		//logoutGplus
-		if(resultCode==9999){
+		if((resultCode==9999)&&(!mGoogleApiClient.isConnected())){
 			Log.d("Logout", "llamada al logout");
+			mGoogleApiClient.reconnect();
 			Log.d("Logout","Valor de la variable mGoogleApiClient en onActivityResult2: "+mGoogleApiClient.isConnected());
 			signOutFromGplus();
 		}
