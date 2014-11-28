@@ -239,6 +239,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
+					Log.d("Logout","Intent en onCreate de twitter en el if is connected");
                     Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
 					startActivity(loginTwitter);	
 				} catch (Exception e) {
@@ -316,13 +317,14 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	public void onConnected(Bundle arg0) {
 		mSignInClicked = false;
 		Toast.makeText(this, "User is connected!", Toast.LENGTH_LONG).show();
-
+        
 		// Get user's information
 		//wE DON NEED THIS RIGHT NOW
 		//getProfileInformation();
 
 		// Update the UI after signin
-		
+		Log.d("Logout"," función onConnected Antes de llamar a updateUI");
+		Log.d("Logout","Valor de mGoogleApiClient: "+mGoogleApiClient.isConnected());
 		updateUI(true);		
 		
 
@@ -334,7 +336,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	private void updateUI(boolean isSignedIn) {
 		Toast.makeText(this, "updateUI", Toast.LENGTH_LONG).show();
 		if (isSignedIn) {
-			
+			Log.d("Logout","Intent de google login en updateUI");
+			Log.d("Logout","Valor de la variable mGoogleApiClient en updateUI : "+mGoogleApiClient.isConnected());
 			Intent googleLogin = new Intent(LoginActivity.this,MainActivityDrawer.class);
 			
 			startActivityForResult(googleLogin, 1);
@@ -347,6 +350,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	}
 	@Override
 	public void onConnectionSuspended(int arg0) {
+		Log.d("Logout","función onConnectionSuspended");
 		mGoogleApiClient.connect();
 		updateUI(false);
 	}
@@ -380,15 +384,18 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	}
 	/**
 	 * Sign-out from google
-	 * 
+	 */
 	public void signOutFromGplus() {
+		Log.d("Logout", "llega al signout");
 		if (mGoogleApiClient.isConnected()) {
 			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
 			mGoogleApiClient.disconnect();
 			mGoogleApiClient.connect();
 			updateUI(false);
+			Log.d("Logout", "termina el signout");
 		}
-	}*/
+		Log.d("Logout", "no pasa por el if "+mGoogleApiClient.isConnected());
+	}
 	//LOGIN FACEBOOK
 	/**
 	 * Function to login into facebook
@@ -452,17 +459,30 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		//Log.d("Logout", requestCode+","+resultCode+","+data.getStringExtra("LogOut"));
+		Log.d("Logout", "llega a la funcion result");
+		
+		
 		//For google
 		if (requestCode == RC_SIGN_IN) {
 			if (resultCode != RESULT_OK) {
+				Log.d("Logout", "los 2 primeros if");
 				mSignInClicked = false;
 			}
 
 			mIntentInProgress = false;
 
 			if (!mGoogleApiClient.isConnecting()) {
+				Log.d("Logout","hace el connect automático");
 				mGoogleApiClient.connect();
 			}
+		}
+		Log.d("Logout","Valor de la variable mGoogleApiClient en onActivityResult1: "+mGoogleApiClient.isConnected());
+		//logoutGplus
+		if(resultCode==9999){
+			Log.d("Logout", "llamada al logout");
+			Log.d("Logout","Valor de la variable mGoogleApiClient en onActivityResult2: "+mGoogleApiClient.isConnected());
+			signOutFromGplus();
 		}
 		//for facebook
 		super.onActivityResult(requestCode, resultCode, data);
@@ -498,10 +518,10 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 					"Already Logged into twitter", Toast.LENGTH_LONG).show();
 			// Hide login button
 			  //Creamos un intent para mandarlo a la actividad correspondiente
-
+            Log.d("Logout", "Intent del twitter");
 			Intent stillLogged = new Intent(LoginActivity.this,MainActivityDrawer.class);
 	        startActivity(stillLogged);
-          
+	        Log.d("Logout", "después del intent del twitter");
 
 	
 		}

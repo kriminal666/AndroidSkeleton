@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -123,17 +124,19 @@ public class FragmentPersonal1 extends Fragment implements View.OnClickListener 
 		switch (v.getId()) {
 		case R.id.btnLogout:
 			 LoginActivity login;
-			 MainActivityDrawer drawer = new MainActivityDrawer();
-			 Intent logoutAll = new Intent();
 			 
+			 Log.d("Logout", "antes del intent");
+			 Intent logoutAll = new Intent();
+			 Log.d("Logout", "antes de putextras");
+			 logoutAll.putExtra("LogOut","logoutGplus");
+			 Log.d("Logout", "antes desetresult");
 		    getActivity().setResult(9999,logoutAll);
-		     drawer.finish(); 
+		    Log.d("Logout", "antes del finish()");
+		    getActivity().finish(); 
+		     Log.d("Logout", "después del finish");
 		 	break;
 		}
-	
-		
-	
-		}// TODO Auto-generated method stub
+	}
 		
 	}
 	
