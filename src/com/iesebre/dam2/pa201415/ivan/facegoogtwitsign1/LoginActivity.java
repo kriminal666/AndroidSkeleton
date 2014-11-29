@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.facebook.Session;
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.DialogError;
@@ -23,6 +24,7 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.SharedPreferences;
@@ -62,8 +64,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		private Facebook facebook = new Facebook(APP_ID);
 		private AsyncFacebookRunner mAsyncRunner;
 		String FILENAME = "AndroidSSO_data";
-		private SharedPreferences mPrefs;
+		private static SharedPreferences mPrefs;
 		private String FACEBOOK_LOGIN = "Facebook_Login";
+		private static final int FACE_REQUEST = 1;
 		//FACEBOOK BUTTON
 		Button btnFbLogin;
 		//END FACEBOOK CAMPS
@@ -82,7 +85,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	static final String PREF_KEY_OAUTH_TOKEN = "oauth_token";
 	static final String PREF_KEY_OAUTH_SECRET = "oauth_token_secret";
 	static final String PREF_KEY_TWITTER_LOGIN = "isTwitterLogedIn";
-
+    //TWITTER REQUEST
+	private static final int TWITTER_REQUEST = 2;
 	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
 
 	// Twitter oauth urls
@@ -133,6 +137,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	//Our own shared for google.
 	private  static SharedPreferences sharedPrefsGoogle;
 	private String GOOGLE_LOGIN = "Google_Login";
+	//GOOGLE REQUEST
+	private static final int GOOGLE_REQUEST = 3;
 	//END GOOGLE CAMPS
 
 	@Override
@@ -216,18 +222,22 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		 * redirected from twitter page. Parse the uri to get oAuth
 		 * Verifier
 		 * */
+		
+		
 		if (!isTwitterLoggedInAlready()) {
+			
+			//GET THE FUCKING URI FROM SPLASH IF WE ARE REDIRECTED FROM TWITTER
 			Uri uri = getIntent().getData();
 			if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
+				
 				// oAuth verifier
 				String verifier = uri
 						.getQueryParameter(URL_TWITTER_OAUTH_VERIFIER);
-
 				try {
 					// Get the access token
 					AccessToken accessToken = twitter.getOAuthAccessToken(
 							requestToken, verifier);
-
+					
 					// Shared Preferences
 					Editor e = mSharedPreferences.edit();
 
@@ -237,19 +247,24 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 					e.putString(PREF_KEY_OAUTH_SECRET,
 							accessToken.getTokenSecret());
 					// Store login status - true
+					Log.d("Logout","pone el boolean a true");
 					e.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
 					e.commit(); // save changes
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
-					Log.d("Logout","Intent en onCreate de twitter en el if is connected");
                     Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
-					startActivity(loginTwitter);	
+					startActivityForResult(loginTwitter,TWITTER_REQUEST);	
 				} catch (Exception e) {
 					// Check log for login errors
-					Log.e("Twitter Login Error", "> " + e.getMessage());
+					Log.d("Logout", "> " + e.getMessage());
 				}
 			}
+			//IF WE ARE CONNECTED TO TWITTER GO TO DRAWER ACTIVITY
+		}else{
+			
+            Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
+			startActivityForResult(loginTwitter,TWITTER_REQUEST);
 		}
 
 	}//End of method onCreate
@@ -299,23 +314,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			}
 		}
 	}
-	//This is used by google and facebook
-	/*
-	@Override
-	protected void onActivityResult(int requestCode, int responseCode,
-			Intent intent) {
-		if (requestCode == RC_SIGN_IN) {
-			if (responseCode != RESULT_OK) {
-				mSignInClicked = false;
-			}
 
-			mIntentInProgress = false;
-
-			if (!mGoogleApiClient.isConnecting()) {
-				mGoogleApiClient.connect();
-			}
-		}
-	}*/
 	@Override
 	public void onConnected(Bundle arg0) {
 		mSignInClicked = false;
@@ -324,6 +323,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		// Get user's information
 		//wE DON NEED THIS RIGHT NOW
 		//getProfileInformation();
+		
 		//Shared Preferences de google Personales
 		sharedPrefsGoogle = getSharedPreferences("google_logout", 0);
 		 Editor edit = sharedPrefsGoogle.edit();
@@ -331,8 +331,6 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		 edit.commit();
 		 
 	
-		
-		
 		// Update the UI after signin
 		Log.d("Logout"," función onConnected Antes de llamar a updateUI");
 		Log.d("Logout","Valor de mGoogleApiClient: "+mGoogleApiClient.isConnected());
@@ -400,6 +398,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		Log.d("Logout", "llega al signout "+sharedPrefsGoogle.getBoolean(GOOGLE_LOGIN,false));
 		
 		Log.d("Logout","Valor "+mGoogleApiClient.isConnected());
+		//AQUÍ REVIENTA TODO mGoogleApiClient.isconnected() ES FALSE Y DEBERÍA SER TRUE
+		//Miramos si nuestra shared es true o false
 		if (sharedPrefsGoogle.getBoolean(GOOGLE_LOGIN,false)) {
 			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
 			mGoogleApiClient.disconnect();
@@ -422,7 +422,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 
 		if (access_token != null) {
 			facebook.setAccessToken(access_token);
-		
+		//Actions when login
+			Log.d("loginface","login facebook 1");
 
 			Log.d("FB Sessions", "" + facebook.isSessionValid());
 		}
@@ -451,6 +452,11 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 							editor.putLong("access_expires",
 									facebook.getAccessExpires());
 							editor.commit();
+							
+							//Actions when login finish on facebook
+							//LET'S GO TO ANOTHER ACTIVITY
+							Intent loginFace = new Intent (LoginActivity.this,MainActivityDrawer.class);
+							startActivityForResult(loginFace,FACE_REQUEST);
 						}
 
 						@Override
@@ -472,7 +478,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		//Log.d("Logout", requestCode+","+resultCode+","+data.getStringExtra("LogOut"));
+		Log.d("Logout", requestCode+","+resultCode);
 		Log.d("Logout", "llega a la funcion result");
 		
 		
@@ -491,14 +497,27 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			}
 		}
 		Log.d("Logout","Valor de la variable mGoogleApiClient en onActivityResult1: "+mGoogleApiClient.isConnected());
-		//logoutGplus
-		if((resultCode==9999)&&(!mGoogleApiClient.isConnected())){
-			Log.d("Logout", "llamada al logout");
-			mGoogleApiClient.reconnect();
-			Log.d("Logout","Valor de la variable mGoogleApiClient en onActivityResult2: "+mGoogleApiClient.isConnected());
-			signOutFromGplus();
+		//logout
+		if(resultCode==9999){
+		  switch (requestCode) {
+		    case FACE_REQUEST :
+		     //IF FACEBOOK CALL LOGOUT
+			 logoutFromFacebook(this);
+			 break;
+		    case TWITTER_REQUEST :
+		    	//IF TWITTER CALL LOGOUT
+		    	if(isTwitterLoggedInAlready()){
+		    		logoutFromTwitter();
+		    		break;
+		    	}
+		    case GOOGLE_REQUEST :
+		    	//IF GOOGLE+ CALL LOGOUT
+		    	signOutFromGplus();
+		    	
+		    	}
 		}
 		//for facebook
+		Log.d("Logout","login facebook onactivity result");
 		super.onActivityResult(requestCode, resultCode, data);
 		facebook.authorizeCallback(requestCode, resultCode, data);
 	}
@@ -531,10 +550,10 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			Toast.makeText(getApplicationContext(),
 					"Already Logged into twitter", Toast.LENGTH_LONG).show();
 			// Hide login button
-			  //Creamos un intent para mandarlo a la actividad correspondiente
-            Log.d("Logout", "Intent del twitter");
+			  //INTENT TO GO TO DRAWER ACTIVITY
+            //COMO ESTAMOS EN OTRA PANTALLA ESTO NO SE DEBERÍA EJECUTAR NUNCA
 			Intent stillLogged = new Intent(LoginActivity.this,MainActivityDrawer.class);
-	        startActivity(stillLogged);
+	        startActivityForResult(stillLogged,TWITTER_REQUEST);
 	        Log.d("Logout", "después del intent del twitter");
 
 	
@@ -547,12 +566,15 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 *  Changed to static for calling from LoginSuccess
 	 * */
 	 protected static void logoutFromTwitter() {
+		 Log.d("Logout","llegamos al logout de twitter");
 		// Clear the shared preferences
 		Editor e = mSharedPreferences.edit();
 		e.remove(PREF_KEY_OAUTH_TOKEN);
 		e.remove(PREF_KEY_OAUTH_SECRET);
 		e.remove(PREF_KEY_TWITTER_LOGIN);
 		e.commit();
+		
+		
 	}
 
 	/**
@@ -565,55 +587,48 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		return mSharedPreferences.getBoolean(PREF_KEY_TWITTER_LOGIN, false);
 	}
 
-	protected void onResume() {
+	protected  void onResume() {
 		super.onResume();
+		
+		
 	}
-	
-    //LOG OUT FROM FACEBOOK
 	/**
-	 * Function to Logout user from Facebook
-	 * */
-	
-	@SuppressWarnings("deprecation")
-	public void logoutFromFacebook() {
-		mAsyncRunner.logout(this, new RequestListener() {
-			@Override
-			public void onComplete(String response, Object state) {
-				Log.d("Logout from Facebook", response);
-				if (Boolean.parseBoolean(response) == true) {
-					runOnUiThread(new Runnable() {
+	 * 
+	 * NEW LOGOUT FROM FACEBOOK
+	 */
+	public static void logoutFromFacebook(Context context) {
+	    Session session = Session.getActiveSession();
+	    if (session != null) {
+	    	Log.d("Logout","pasa primer if");
+	        if (!session.isClosed()) {
+	        	
+	            session.closeAndClearTokenInformation();
+	            //CLEAR FACEBOOK PREFERENCES
+	           SharedPreferences.Editor editor = mPrefs.edit();
+	    		editor.remove("access_token");
+	    		editor.remove("access_expires");
+	    		editor.commit();
+	    		
+	        }
+	    } else {
+	    	Log.d("Logout","llega al else");
+	        session = new Session(context);
+	        Session.setActiveSession(session);
 
-						@Override
-						public void run() {
-							// make Login button visible
-							//wHEN LOGOUT WHAT TO DO
-							
+	        session.closeAndClearTokenInformation();
+	         //CLEAR FACEBOOK PREFERENCES
+	        SharedPreferences.Editor editor = mPrefs.edit();
+    		editor.remove("access_token");
+    		editor.remove("access_expires");
+    		editor.commit();
+    		Log.d("Logout","limpia shared");
+    		Log.d("Logout", "Reload activity");
+    		//REFRESH THIS ACTIVITY TO CLEAN DATA
+    		Intent refresh = new Intent(context,LoginActivity.class);
+    		context.startActivity(refresh);
+	    }
 
-						
-						}
-
-					});
-
-				}
-			}
-
-			public void onIOException(IOException e, Object state) {
-			}
-
-			public void onFileNotFoundException(FileNotFoundException e,
-					Object state) {
-			}
-
-			public void onMalformedURLException(MalformedURLException e,
-					Object state) {
-			}
-
-			
-			public void onFacebookError(FacebookError e, Object state) {
-			}
-		});
-	}
-	//END LOGOUT FACEBOOK
+	}//END LOGOUT FACEBOOK
 
 	
-}
+}//END CLASS

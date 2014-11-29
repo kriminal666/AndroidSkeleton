@@ -2,7 +2,9 @@ package com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -24,7 +26,9 @@ public class SplashActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         setContentView(R.layout.splash);
-   
+        //IF WE ARE REDIRECTED FROM TWITTER WE NEED TO GET URI
+        final Uri uriTwitter = getIntent().getData();
+        Log.d("Logout","Valor de uri en el splash: "+uriTwitter);
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
@@ -32,6 +36,8 @@ public class SplashActivity extends Activity {
                 // llamar a la pantalla de login
                 Intent mainIntent = new Intent().setClass(
                         SplashActivity.this, LoginActivity.class);
+                //we send the uri to login activity
+                mainIntent.setData(uriTwitter);
                 startActivity(mainIntent);
             	
                 //Cerramos la actividad de manera que no se pueda volver atrás

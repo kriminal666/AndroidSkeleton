@@ -32,6 +32,8 @@ public class FragmentPersonal1 extends Fragment implements View.OnClickListener 
 	// TODO: Rename and change types of parameters
 	private String mParam1;
 	private String mParam2;
+	//We need to know where are we logged in
+	private int request;
 
 	private OnFragmentInteractionListener mListener;
 
@@ -121,15 +123,12 @@ public class FragmentPersonal1 extends Fragment implements View.OnClickListener 
 
 	@Override
 	public void onClick(View v) {
+		//KEEP THIS SWITCH FOR FUTURE NEW BUTTONS
 		switch (v.getId()) {
 		case R.id.btnLogout:
-			 LoginActivity login;
-			 
-			 Log.d("Logout", "antes del intent");
+	    	 Log.d("Logout", "antes del intent");
 			 Intent logoutAll = new Intent();
-			 Log.d("Logout", "antes de putextras");
-			 logoutAll.putExtra("LogOut","logoutGplus");
-			 Log.d("Logout", "antes desetresult");
+			 Log.d("Logout", "antes de setresult");
 		    getActivity().setResult(9999,logoutAll);
 		    Log.d("Logout", "antes del finish()");
 		    getActivity().finish(); 
