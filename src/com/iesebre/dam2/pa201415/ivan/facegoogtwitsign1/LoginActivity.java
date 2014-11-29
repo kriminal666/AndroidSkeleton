@@ -349,7 +349,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			Log.d("Logout","Valor de la variable mGoogleApiClient en updateUI : "+mGoogleApiClient.isConnected());
 			Intent googleLogin = new Intent(LoginActivity.this,MainActivityDrawer.class);
 			
-			startActivityForResult(googleLogin, 1);
+			startActivityForResult(googleLogin, GOOGLE_REQUEST);
 			
 		} else {
 			
