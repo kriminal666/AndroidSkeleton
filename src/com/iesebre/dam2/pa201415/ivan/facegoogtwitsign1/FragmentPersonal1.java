@@ -77,8 +77,10 @@ public class FragmentPersonal1 extends Fragment implements View.OnClickListener 
 		View v =inflater.inflate(R.layout.fragment_personal1, container, false);
 		//Get the button
 		Button btnLogout = (Button)v.findViewById(R.id.btnLogout);
-		btnLogout.setOnClickListener(this);
-		
+		//DONT NEED THIS RIGHT NOW
+		//btnLogout.setOnClickListener(this);
+		//SET INVISIBLE WE ARE GOING TO USE MENU SECTION TO LOGOUT
+		btnLogout.setVisibility(View.GONE);
 		
 		return v;
 	}
@@ -123,18 +125,15 @@ public class FragmentPersonal1 extends Fragment implements View.OnClickListener 
 
 	@Override
 	public void onClick(View v) {
-		//KEEP THIS SWITCH FOR FUTURE NEW BUTTONS
-		switch (v.getId()) {
+		/*KEEP THIS SWITCH FOR FUTURE NEW BUTTONS
+		*OR FOR OTHERS IMPLEMENTATIONS
+		/*switch (v.getId()) {
 		case R.id.btnLogout:
-	    	 Log.d("Logout", "antes del intent");
-			 Intent logoutAll = new Intent();
-			 Log.d("Logout", "antes de setresult");
+	    	Intent logoutAll = new Intent();
 		    getActivity().setResult(9999,logoutAll);
-		    Log.d("Logout", "antes del finish()");
 		    getActivity().finish(); 
-		     Log.d("Logout", "después del finish");
 		 	break;
-		}
+		}*/
 	}
 		
 	}

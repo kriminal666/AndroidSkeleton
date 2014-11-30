@@ -134,17 +134,22 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
     //we need just one button
 	//private SignInButton btnSignIn;
 	private Button btnSignIn;
-	//Our own shared for google.
-	private  static SharedPreferences sharedPrefsGoogle;
-	private String GOOGLE_LOGIN = "Google_Login";
 	//GOOGLE REQUEST
 	private static final int GOOGLE_REQUEST = 3;
 	//END GOOGLE CAMPS
-
+    //PERSONAL CAMP FOR TOAST
+	Context context;
+	//PERSONAL PREFERENCES TO TEST IF WE ARE LOGGED
+	private SharedPreferences myPrefs;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		//For toasts
+		context = getApplicationContext();
+		//INIT OR PREFS
+		myPrefs = getApplicationContext().getSharedPreferences("MyPrefs", 0);
+		
 		//FACEBOOK CONTROLS
 		btnFbLogin = (Button) findViewById(R.id.btnFb);
 		mAsyncRunner = new AsyncFacebookRunner(facebook);
@@ -218,6 +223,16 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 				loginToTwitter();
 			}
 		});
+		
+		/*Check if we are logged to facebook
+		 * using  our own shared preferences 
+		 */
+		//IF ITŚ NOT NULL WE ARE ALSO LOGGED INTO FACEBOOK SO LET'S GO TO ANOTHER ACTIVITY
+		  if(myPrefs.getBoolean("LoggedFacebbo",false)){
+			Intent weAreLoggedFacebook = new Intent(LoginActivity.this,MainActivityDrawer.class);
+			startActivityForResult(weAreLoggedFacebook,FACE_REQUEST);
+		}
+		
         /** This if conditions is tested once is
 		 * redirected from twitter page. Parse the uri to get oAuth
 		 * Verifier
@@ -247,12 +262,12 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 					e.putString(PREF_KEY_OAUTH_SECRET,
 							accessToken.getTokenSecret());
 					// Store login status - true
-					Log.d("Logout","pone el boolean a true");
 					e.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
 					e.commit(); // save changes
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
+					Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
                     Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
 					startActivityForResult(loginTwitter,TWITTER_REQUEST);	
 				} catch (Exception e) {
@@ -272,14 +287,19 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	protected void onStart() {
 		super.onStart();
 		mGoogleApiClient.connect();
+		
 	}
-
+    /*
+     * No need to use this 
+     * @see android.app.Activity#onStop()
+     
 	protected void onStop() {
 		super.onStop();
 		if (mGoogleApiClient.isConnected()) {
 			mGoogleApiClient.disconnect();
 		}
-	}
+	}*/
+	
 	/**
 	 * Method to resolve any sign in errors
 	 * */
@@ -318,22 +338,13 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	@Override
 	public void onConnected(Bundle arg0) {
 		mSignInClicked = false;
-		Toast.makeText(this, "User is connected!", Toast.LENGTH_LONG).show();
+		Toast.makeText(context, "User connected to Google+", Toast.LENGTH_LONG).show();
         
 		// Get user's information
 		//wE DON NEED THIS RIGHT NOW
 		//getProfileInformation();
 		
-		//Shared Preferences de google Personales
-		sharedPrefsGoogle = getSharedPreferences("google_logout", 0);
-		 Editor edit = sharedPrefsGoogle.edit();
-		 edit.putBoolean(GOOGLE_LOGIN, true);
-		 edit.commit();
-		 
-	
 		// Update the UI after signin
-		Log.d("Logout"," función onConnected Antes de llamar a updateUI");
-		Log.d("Logout","Valor de mGoogleApiClient: "+mGoogleApiClient.isConnected());
 		updateUI(true);		
 		
 
@@ -343,23 +354,20 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 *aCTIONS TO DO ONCE WE ARE SIGN IN
 	 * */
 	private void updateUI(boolean isSignedIn) {
-		Toast.makeText(this, "updateUI", Toast.LENGTH_LONG).show();
 		if (isSignedIn) {
-			Log.d("Logout","Intent de google login en updateUI");
-			Log.d("Logout","Valor de la variable mGoogleApiClient en updateUI : "+mGoogleApiClient.isConnected());
+			//LET'S GO TO DE NEXT ACTIVITY
 			Intent googleLogin = new Intent(LoginActivity.this,MainActivityDrawer.class);
-			
 			startActivityForResult(googleLogin, GOOGLE_REQUEST);
 			
 		} else {
-			
-			btnSignIn.setVisibility(View.VISIBLE);
+			//if false we don't need to do nothing
+			Toast.makeText(context, "User Disconnected from Google+", Toast.LENGTH_LONG).show();
+			return;
 	
 		}
 	}
 	@Override
 	public void onConnectionSuspended(int arg0) {
-		Log.d("Logout","función onConnectionSuspended");
 		mGoogleApiClient.connect();
 		updateUI(false);
 	}
@@ -395,19 +403,16 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * Sign-out from google
 	 */
 	public void signOutFromGplus() {
-		Log.d("Logout", "llega al signout "+sharedPrefsGoogle.getBoolean(GOOGLE_LOGIN,false));
 		
-		Log.d("Logout","Valor "+mGoogleApiClient.isConnected());
-		//AQUÍ REVIENTA TODO mGoogleApiClient.isconnected() ES FALSE Y DEBERÍA SER TRUE
-		//Miramos si nuestra shared es true o false
-		if (sharedPrefsGoogle.getBoolean(GOOGLE_LOGIN,false)) {
+		// shared es true o false sharedPrefsGoogle.getBoolean(GOOGLE_LOGIN,false)
+		if (mGoogleApiClient.isConnected()) {
 			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
 			mGoogleApiClient.disconnect();
 			mGoogleApiClient.connect();
 			updateUI(false);
-			Log.d("Logout", "termina el signout");
+			
 		}
-		Log.d("Logout", "no pasa por el if "+mGoogleApiClient.isConnected());
+		
 	}
 	//LOGIN FACEBOOK
 	/**
@@ -419,6 +424,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		mPrefs = getPreferences(MODE_PRIVATE);
 		String access_token = mPrefs.getString("access_token", null);
 		long expires = mPrefs.getLong("access_expires", 0);
+		
 
 		if (access_token != null) {
 			facebook.setAccessToken(access_token);
@@ -452,8 +458,12 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 							editor.putLong("access_expires",
 									facebook.getAccessExpires());
 							editor.commit();
-							
+							//SAVE LOGIN IN OUR PREFERENCES
+							SharedPreferences.Editor ourEditor = myPrefs.edit();
+							ourEditor.putBoolean("LoggedFacebook", true);
+							ourEditor.commit();
 							//Actions when login finish on facebook
+							Toast.makeText(context,"User connected to Facebook", Toast.LENGTH_LONG).show();
 							//LET'S GO TO ANOTHER ACTIVITY
 							Intent loginFace = new Intent (LoginActivity.this,MainActivityDrawer.class);
 							startActivityForResult(loginFace,FACE_REQUEST);
@@ -478,25 +488,18 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.d("Logout", requestCode+","+resultCode);
-		Log.d("Logout", "llega a la funcion result");
-		
-		
 		//For google
 		if (requestCode == RC_SIGN_IN) {
 			if (resultCode != RESULT_OK) {
-				Log.d("Logout", "los 2 primeros if");
 				mSignInClicked = false;
 			}
 
 			mIntentInProgress = false;
 
 			if (!mGoogleApiClient.isConnecting()) {
-				Log.d("Logout","hace el connect automático");
 				mGoogleApiClient.connect();
 			}
 		}
-		Log.d("Logout","Valor de la variable mGoogleApiClient en onActivityResult1: "+mGoogleApiClient.isConnected());
 		//logout
 		if(resultCode==9999){
 		  switch (requestCode) {
@@ -517,7 +520,6 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		    	}
 		}
 		//for facebook
-		Log.d("Logout","login facebook onactivity result");
 		super.onActivityResult(requestCode, resultCode, data);
 		facebook.authorizeCallback(requestCode, resultCode, data);
 	}
@@ -554,8 +556,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
             //COMO ESTAMOS EN OTRA PANTALLA ESTO NO SE DEBERÍA EJECUTAR NUNCA
 			Intent stillLogged = new Intent(LoginActivity.this,MainActivityDrawer.class);
 	        startActivityForResult(stillLogged,TWITTER_REQUEST);
-	        Log.d("Logout", "después del intent del twitter");
-
+	        
 	
 		}
 	}
@@ -565,24 +566,21 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * It will just clear the application shared preferences
 	 *  Changed to static for calling from LoginSuccess
 	 * */
-	 protected static void logoutFromTwitter() {
-		 Log.d("Logout","llegamos al logout de twitter");
+	 private void logoutFromTwitter() {
 		// Clear the shared preferences
 		Editor e = mSharedPreferences.edit();
 		e.remove(PREF_KEY_OAUTH_TOKEN);
 		e.remove(PREF_KEY_OAUTH_SECRET);
 		e.remove(PREF_KEY_TWITTER_LOGIN);
 		e.commit();
-		
-		
-	}
+		Toast.makeText(context,"User disconnected from Twitter", Toast.LENGTH_LONG).show();
+		}
 
 	/**
 	 * Check user already logged in your application using twitter Login flag is
 	 * fetched from Shared Preferences
 	 * */
-	//Change private to static just to call from LoginSuccess
-	protected static boolean isTwitterLoggedInAlready() {
+	private boolean isTwitterLoggedInAlready() {
 		// return twitter login status from Shared Preferences
 		return mSharedPreferences.getBoolean(PREF_KEY_TWITTER_LOGIN, false);
 	}
@@ -596,7 +594,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * 
 	 * NEW LOGOUT FROM FACEBOOK
 	 */
-	public static void logoutFromFacebook(Context context) {
+	public void logoutFromFacebook(Context context) {
 	    Session session = Session.getActiveSession();
 	    if (session != null) {
 	    	Log.d("Logout","pasa primer if");
@@ -608,10 +606,15 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	    		editor.remove("access_token");
 	    		editor.remove("access_expires");
 	    		editor.commit();
+	    		//CLEAR OUr PREFS
+	    		SharedPreferences.Editor ourEditor = myPrefs.edit();
+	    		ourEditor.remove("LoggedFacebbok");
+	    		ourEditor.commit();
+	    		Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
 	    		
 	        }
 	    } else {
-	    	Log.d("Logout","llega al else");
+	    	
 	        session = new Session(context);
 	        Session.setActiveSession(session);
 
@@ -621,8 +624,11 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
     		editor.remove("access_token");
     		editor.remove("access_expires");
     		editor.commit();
-    		Log.d("Logout","limpia shared");
-    		Log.d("Logout", "Reload activity");
+    		//CLEAR OUr PREFS
+    		SharedPreferences.Editor ourEditor = myPrefs.edit();
+    		ourEditor.remove("LoggedFacebbok");
+    		ourEditor.commit();
+    		Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
     		//REFRESH THIS ACTIVITY TO CLEAN DATA
     		Intent refresh = new Intent(context,LoginActivity.class);
     		context.startActivity(refresh);

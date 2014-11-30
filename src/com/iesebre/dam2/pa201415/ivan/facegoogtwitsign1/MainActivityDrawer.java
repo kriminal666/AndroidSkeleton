@@ -71,11 +71,17 @@ public class MainActivityDrawer extends ActionBarActivity implements
 			   {
 			     case 0:
 			    	 //When section select load our personal fragment
+			    	 //BUT WE DON'T USE IT RIGHT NOW
 			        fragment = (Fragment) new FragmentPersonal1();
+				    
+				  
 			        break;
 			     case 1:
 			    	 Log.w(this.getClass().getSimpleName(), "Section 1");
-	
+			    	  //LET'S GO TO LOGOUT
+				        Intent logOutAll = new Intent();
+					    setResult(9999,logOutAll);
+					    finish();
 			        break;
 			     case 2:
 			    	 Log.w(this.getClass().getSimpleName(), "Section 2");

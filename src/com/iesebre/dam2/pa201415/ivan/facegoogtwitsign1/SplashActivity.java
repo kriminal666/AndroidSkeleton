@@ -28,7 +28,6 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.splash);
         //IF WE ARE REDIRECTED FROM TWITTER WE NEED TO GET URI
         final Uri uriTwitter = getIntent().getData();
-        Log.d("Logout","Valor de uri en el splash: "+uriTwitter);
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
