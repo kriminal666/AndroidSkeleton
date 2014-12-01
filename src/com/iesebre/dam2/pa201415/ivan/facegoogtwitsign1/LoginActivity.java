@@ -530,7 +530,12 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * */
 	private void loginToTwitter() {
 		// Check if already logged in
+		
+		String oauth_token = mSharedPreferences.getString(PREF_KEY_OAUTH_TOKEN, null);
+		String oauth_secret = mSharedPreferences.getString(PREF_KEY_OAUTH_SECRET,null);
+		
 		if (!isTwitterLoggedInAlready()) {
+			if ((oauth_token==null)&&(oauth_secret==null)){
 			ConfigurationBuilder builder = new ConfigurationBuilder();
 			builder.setOAuthConsumerKey(TWITTER_CONSUMER_KEY);
 			builder.setOAuthConsumerSecret(TWITTER_CONSUMER_SECRET);
@@ -547,15 +552,20 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			} catch (TwitterException e) {
 				e.printStackTrace();
 			}
-		} else {
-			// user already logged into twitter
-			Toast.makeText(getApplicationContext(),
-					"Already Logged into twitter", Toast.LENGTH_LONG).show();
-			// Hide login button
-			  //INTENT TO GO TO DRAWER ACTIVITY
-            //COMO ESTAMOS EN OTRA PANTALLA ESTO NO SE DEBERÍA EJECUTAR NUNCA
-			Intent stillLogged = new Intent(LoginActivity.this,MainActivityDrawer.class);
-	        startActivityForResult(stillLogged,TWITTER_REQUEST);
+		   }else {
+			   
+				// user logged into twitter if we have tokens
+			   Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
+				// EDIT PREFERENCES
+			   SharedPreferences.Editor editor = mSharedPreferences.edit();
+				// Store login status - true
+				editor.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
+				editor.commit(); // save changes
+				  //INTENT TO GO TO DRAWER ACTIVITY IF WE HAVE LOGGED IN ONCE BEFORE
+	     
+				Intent stillLogged = new Intent(LoginActivity.this,MainActivityDrawer.class);
+		        startActivityForResult(stillLogged,TWITTER_REQUEST);
+		} 
 	        
 	
 		}
@@ -569,10 +579,17 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 private void logoutFromTwitter() {
 		// Clear the shared preferences
 		Editor e = mSharedPreferences.edit();
-		e.remove(PREF_KEY_OAUTH_TOKEN);
-		e.remove(PREF_KEY_OAUTH_SECRET);
+		
+		//e.remove(PREF_KEY_OAUTH_TOKEN);
+		//e.remove(PREF_KEY_OAUTH_SECRET);
 		e.remove(PREF_KEY_TWITTER_LOGIN);
 		e.commit();
+		/*	
+		//Cierra toda la aplicación
+		Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+	    homeIntent.addCategory( Intent.CATEGORY_HOME );
+	    homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  
+	    startActivity(homeIntent); */
 		Toast.makeText(context,"User disconnected from Twitter", Toast.LENGTH_LONG).show();
 		}
 
