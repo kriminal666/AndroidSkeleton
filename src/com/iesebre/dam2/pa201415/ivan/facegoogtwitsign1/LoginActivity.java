@@ -139,16 +139,14 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	//END GOOGLE CAMPS
     //PERSONAL CAMP FOR TOAST
 	Context context;
-	//PERSONAL PREFERENCES TO TEST IF WE ARE LOGGED
-	private SharedPreferences myPrefs;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		//For toasts
 		context = getApplicationContext();
-		//INIT OR PREFS
-		myPrefs = getApplicationContext().getSharedPreferences("MyPrefs", 0);
+	
 		
 		//FACEBOOK CONTROLS
 		btnFbLogin = (Button) findViewById(R.id.btnFb);
@@ -224,14 +222,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			}
 		});
 		
-		/*Check if we are logged to facebook
-		 * using  our own shared preferences 
-		 */
-		//IF ITŚ NOT NULL WE ARE ALSO LOGGED INTO FACEBOOK SO LET'S GO TO ANOTHER ACTIVITY
-		  if(myPrefs.getBoolean("LoggedFacebbo",false)){
-			Intent weAreLoggedFacebook = new Intent(LoginActivity.this,MainActivityDrawer.class);
-			startActivityForResult(weAreLoggedFacebook,FACE_REQUEST);
-		}
+		
 		
         /** This if conditions is tested once is
 		 * redirected from twitter page. Parse the uri to get oAuth
@@ -424,8 +415,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		mPrefs = getPreferences(MODE_PRIVATE);
 		String access_token = mPrefs.getString("access_token", null);
 		long expires = mPrefs.getLong("access_expires", 0);
-		
-
+		//If we have been logged before set the access token and expires
+        
 		if (access_token != null) {
 			facebook.setAccessToken(access_token);
 		//Actions when login
@@ -437,8 +428,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		if (expires != 0) {
 			facebook.setAccessExpires(expires);
 		}
-
+        //Check if session is really valid
 		if (!facebook.isSessionValid()) {
+			Log.d("Logout","La sesión ha dado que no");
 			facebook.authorize(this,
 					new String[] { "email", "publish_stream" },
 					new DialogListener() {
@@ -458,10 +450,6 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 							editor.putLong("access_expires",
 									facebook.getAccessExpires());
 							editor.commit();
-							//SAVE LOGIN IN OUR PREFERENCES
-							SharedPreferences.Editor ourEditor = myPrefs.edit();
-							ourEditor.putBoolean("LoggedFacebook", true);
-							ourEditor.commit();
 							//Actions when login finish on facebook
 							Toast.makeText(context,"User connected to Facebook", Toast.LENGTH_LONG).show();
 							//LET'S GO TO ANOTHER ACTIVITY
@@ -482,6 +470,12 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 						}
 
 					});
+		}else{
+			//If we have been logged before and session is valid
+			Toast.makeText(context,"User connected to Facebook", Toast.LENGTH_LONG).show();
+			//LET'S GO TO ANOTHER ACTIVITY
+			Intent loginFace = new Intent (LoginActivity.this,MainActivityDrawer.class);
+			startActivityForResult(loginFace,FACE_REQUEST);
 		}
 		
 	}
@@ -565,6 +559,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	     
 				Intent stillLogged = new Intent(LoginActivity.this,MainActivityDrawer.class);
 		        startActivityForResult(stillLogged,TWITTER_REQUEST);
+		        finish();
 		} 
 	        
 	
@@ -613,38 +608,32 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 */
 	public void logoutFromFacebook(Context context) {
 	    Session session = Session.getActiveSession();
+	    //Normally Dont pass through this if
 	    if (session != null) {
 	    	Log.d("Logout","pasa primer if");
 	        if (!session.isClosed()) {
 	        	
 	            session.closeAndClearTokenInformation();
 	            //CLEAR FACEBOOK PREFERENCES
-	           SharedPreferences.Editor editor = mPrefs.edit();
-	    		editor.remove("access_token");
-	    		editor.remove("access_expires");
-	    		editor.commit();
-	    		//CLEAR OUr PREFS
-	    		SharedPreferences.Editor ourEditor = myPrefs.edit();
-	    		ourEditor.remove("LoggedFacebbok");
-	    		ourEditor.commit();
+	          // SharedPreferences.Editor editor = mPrefs.edit();
+	    		//editor.remove("access_token");
+	    		//editor.remove("access_expires");
+	    		//editor.commit();
+	    		
 	    		Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
 	    		
 	        }
 	    } else {
-	    	
+	    	//Normally it comes here..
 	        session = new Session(context);
 	        Session.setActiveSession(session);
 
 	        session.closeAndClearTokenInformation();
 	         //CLEAR FACEBOOK PREFERENCES
-	        SharedPreferences.Editor editor = mPrefs.edit();
-    		editor.remove("access_token");
-    		editor.remove("access_expires");
-    		editor.commit();
-    		//CLEAR OUr PREFS
-    		SharedPreferences.Editor ourEditor = myPrefs.edit();
-    		ourEditor.remove("LoggedFacebbok");
-    		ourEditor.commit();
+	        //SharedPreferences.Editor editor = mPrefs.edit();
+    		//editor.remove("access_token");
+    		//editor.remove("access_expires");
+    		//editor.commit();
     		Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
     		//REFRESH THIS ACTIVITY TO CLEAN DATA
     		Intent refresh = new Intent(context,LoginActivity.class);
