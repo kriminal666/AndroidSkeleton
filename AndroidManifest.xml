@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1"
+    package="com.iesebre.dam2.pa201415.ivan.androidskeleton"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -23,7 +23,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".SplashActivity"
+            android:name="com.iesebre.dam2.pa201415.ivan.androidskeleton.SplashActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,11 +42,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name="com.iesebre.dam2.pa201415.ivan.androidskeleton.LoginActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".LoginSuccess"
+            android:name="com.iesebre.dam2.pa201415.ivan.androidskeleton.LoginSuccess"
             android:label="@string/app_name" />
 
         <meta-data
@@ -54,7 +54,7 @@
             android:value="@string/facebook_app_id" />
 
         <activity
-            android:name=".MainActivityDrawer"
+            android:name="com.iesebre.dam2.pa201415.ivan.androidskeleton.MainActivityDrawer"
             android:label="@string/title_activity_main_activity_drawer">
         </activity>
     </application>

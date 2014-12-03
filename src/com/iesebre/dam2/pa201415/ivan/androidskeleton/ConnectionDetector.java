@@ -1,4 +1,4 @@
-package com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1;
+package com.iesebre.dam2.pa201415.ivan.androidskeleton;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

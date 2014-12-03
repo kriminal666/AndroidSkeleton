@@ -1,4 +1,4 @@
-package com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1;
+package com.iesebre.dam2.pa201415.ivan.androidskeleton;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -11,7 +11,7 @@ import android.widget.Toast;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1.R;
+import com.iesebre.dam2.pa201415.ivan.androidskeleton.R;
 public class SplashActivity extends Activity {
 	 // Duración de la pantalla splash
     private static final long SPLASH_SCREEN_DELAY = 5000;

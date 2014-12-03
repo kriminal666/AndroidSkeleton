@@ -1,9 +1,9 @@
-package com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1;
+package com.iesebre.dam2.pa201415.ivan.androidskeleton;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1.R;
+import com.iesebre.dam2.pa201415.ivan.androidskeleton.R;
 
 public class AlertDialogManager {
 	/**

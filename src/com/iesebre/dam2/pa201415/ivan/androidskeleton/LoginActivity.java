@@ -1,4 +1,4 @@
-package com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1;
+package com.iesebre.dam2.pa201415.ivan.androidskeleton;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -51,6 +51,7 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
+import com.iesebre.dam2.pa201415.ivan.androidskeleton.R;
 
 
 

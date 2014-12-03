@@ -1,6 +1,7 @@
-package com.iesebre.dam2.pa201415.ivan.facegoogtwitsign1;
+package com.iesebre.dam2.pa201415.ivan.androidskeleton;
 
 import com.google.android.gms.plus.Plus;
+import com.iesebre.dam2.pa201415.ivan.androidskeleton.R;
 
 import android.app.ActionBar;
 import android.app.Activity;
