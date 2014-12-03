@@ -140,6 +140,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	//END GOOGLE CAMPS
     //PERSONAL CAMP FOR TOAST
 	Context context;
+	//PERSONAL PROGRESS DIALOG
+	private ProgressDialog progressDialog;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -147,7 +149,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		setContentView(R.layout.activity_main);
 		//For toasts
 		context = getApplicationContext();
-	
+	   //INIT PROGRESS DIALOG
+		progressDialog =  new ProgressDialog(this);
 		
 		//FACEBOOK CONTROLS
 		btnFbLogin = (Button) findViewById(R.id.btnFb);
@@ -219,6 +222,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			public void onClick(View arg0) {
 				// Call login twitter function
 				//new LoginToTwitter().execute();
+				ProgressDialog.show(LoginActivity.this,"","Loading");
 				loginToTwitter();
 			}
 		});
@@ -259,6 +263,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
+					progressDialog.hide();
 					Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
                     Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
 					startActivityForResult(loginTwitter,TWITTER_REQUEST);	
@@ -275,6 +280,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		}
 
 	}//End of method onCreate
+	public void progressDialog(){
+		
+	}
 	//GOOGLE METHODS
 	protected void onStart() {
 		super.onStart();
@@ -347,6 +355,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * */
 	private void updateUI(boolean isSignedIn) {
 		if (isSignedIn) {
+			//HIDE PROGRESSDIALOG
+			progressDialog.hide();
 			//LET'S GO TO DE NEXT ACTIVITY
 			Intent googleLogin = new Intent(LoginActivity.this,MainActivityDrawer.class);
 			startActivityForResult(googleLogin, GOOGLE_REQUEST);
@@ -378,6 +388,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		switch (v.getId()) {
 		case R.id.btnGplus:
 			// Sign in button clicked
+			ProgressDialog.show(LoginActivity.this,"","Loading");
 			signInWithGplus();
 			break;
 		}
@@ -548,7 +559,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 				e.printStackTrace();
 			}
 		   }else {
-			   
+			      //HIDE PROGRESS DIALOG
+			      progressDialog.hide();
 				// user logged into twitter if we have tokens
 			   Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
 				// EDIT PREFERENCES
