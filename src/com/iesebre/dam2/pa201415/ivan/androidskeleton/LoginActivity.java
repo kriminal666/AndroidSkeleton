@@ -280,9 +280,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		}
 
 	}//End of method onCreate
-	public void progressDialog(){
-		
-	}
+	
 	//GOOGLE METHODS
 	protected void onStart() {
 		super.onStart();
@@ -345,6 +343,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		//getProfileInformation();
 		
 		// Update the UI after signin
+		//HIDE PROGRESSDIALOG
+		Log.d("Logout","paramos progress google");
+		progressDialog.hide();
 		updateUI(true);		
 		
 
@@ -355,8 +356,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * */
 	private void updateUI(boolean isSignedIn) {
 		if (isSignedIn) {
-			//HIDE PROGRESSDIALOG
-			progressDialog.hide();
+			
 			//LET'S GO TO DE NEXT ACTIVITY
 			Intent googleLogin = new Intent(LoginActivity.this,MainActivityDrawer.class);
 			startActivityForResult(googleLogin, GOOGLE_REQUEST);
@@ -388,6 +388,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		switch (v.getId()) {
 		case R.id.btnGplus:
 			// Sign in button clicked
+			Log.d("Logout","seactiva el progress");
 			ProgressDialog.show(LoginActivity.this,"","Loading");
 			signInWithGplus();
 			break;
@@ -416,6 +417,26 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			
 		}
 		
+	}
+	/**
+	 * Revoking access from google
+	 * */
+	private void revokeGplusAccess() {
+		 Log.d("Logout","revoke google");
+		if (mGoogleApiClient.isConnected()) {
+			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+			Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient)
+					.setResultCallback(new ResultCallback<Status>() {
+						@Override
+						public void onResult(Status arg0) {
+							Log.e(TAG, "User access revoked!");
+							mGoogleApiClient.disconnect();
+							mGoogleApiClient.connect();
+							updateUI(false);
+						}
+
+					});
+		}
 	}
 	//LOGIN FACEBOOK
 	/**
@@ -494,6 +515,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		//GET INTENT DATA
+		boolean extras= data.getBooleanExtra(BaseUtils.REVOKE,false);
+		Log.d("Logout","onActivityrResult :"+extras);
 		//For google
 		if (requestCode == RC_SIGN_IN) {
 			if (resultCode != RESULT_OK) {
@@ -506,21 +530,24 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 				mGoogleApiClient.connect();
 			}
 		}
-		//logout
-		if(resultCode==9999){
+		//logout               if exists extras and it's true or false
+		if((resultCode==9999)&&((extras)||(!extras))){
 		  switch (requestCode) {
 		    case FACE_REQUEST :
 		     //IF FACEBOOK CALL LOGOUT
-			 logoutFromFacebook(this);
+			 logoutFromFacebook(this,extras);
 			 break;
 		    case TWITTER_REQUEST :
 		    	//IF TWITTER CALL LOGOUT
 		    	if(isTwitterLoggedInAlready()){
-		    		logoutFromTwitter();
+		    		logoutFromTwitter(extras);
 		    		break;
 		    	}
 		    case GOOGLE_REQUEST :
-		    	//IF GOOGLE+ CALL LOGOUT
+		    	//IF GOOGLE+ CALL LOGOUT OR REVOKE
+		    	if(extras){
+		    	 revokeGplusAccess();
+		    	}
 		    	signOutFromGplus();
 		    	
 		    	}
@@ -584,12 +611,16 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * It will just clear the application shared preferences
 	 *  Changed to static for calling from LoginSuccess
 	 * */
-	 private void logoutFromTwitter() {
+	 private void logoutFromTwitter(boolean revoke) {
 		// Clear the shared preferences
+		 Log.d("Logout","logout twiitter"+revoke);
 		Editor e = mSharedPreferences.edit();
-		
-		//e.remove(PREF_KEY_OAUTH_TOKEN);
-		//e.remove(PREF_KEY_OAUTH_SECRET);
+		//IF WE WANT TO REVOKE REMOVE TOKENS
+		 if(revoke){
+			 Log.d("Logout","logout twitter limpiamos token"); 
+		  e.remove(PREF_KEY_OAUTH_TOKEN);
+		  e.remove(PREF_KEY_OAUTH_SECRET);
+		 }
 		e.remove(PREF_KEY_TWITTER_LOGIN);
 		e.commit();
 		/*	
@@ -619,19 +650,25 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * 
 	 * NEW LOGOUT FROM FACEBOOK
 	 */
-	public void logoutFromFacebook(Context context) {
+	public void logoutFromFacebook(Context context,boolean revoke) {
 	    Session session = Session.getActiveSession();
+	    Log.d("Logout","logout facebook"+revoke);
 	    //Normally Dont pass through this if
 	    if (session != null) {
 	    	Log.d("Logout","pasa primer if");
-	        if (!session.isClosed()) {
-	        	
-	            session.closeAndClearTokenInformation();
+	    	Log.d("Logout","valor "+session.isClosed());
+	    	//We change if  if(!session.isclosed)
+	        if (session.isClosed()) {
+	        	session.closeAndClearTokenInformation();
+	        	//IF WE WANT TO REVOKE
+	        	if(revoke){
+	        		Log.d("Logout","limpiamos token");
 	            //CLEAR FACEBOOK PREFERENCES
-	          // SharedPreferences.Editor editor = mPrefs.edit();
-	    		//editor.remove("access_token");
-	    		//editor.remove("access_expires");
-	    		//editor.commit();
+	             SharedPreferences.Editor editor = mPrefs.edit();
+	    		 editor.remove("access_token");
+	    		 editor.remove("access_expires");
+	    		 editor.commit();
+	        	}
 	    		
 	    		Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
 	    		
@@ -642,18 +679,23 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	        Session.setActiveSession(session);
 
 	        session.closeAndClearTokenInformation();
+	        //IF WE WANT TO REVOKE
+	        if(revoke){
+	        	 Log.d("Logout","logout facebook, limpiamos token");
 	         //CLEAR FACEBOOK PREFERENCES
-	        //SharedPreferences.Editor editor = mPrefs.edit();
-    		//editor.remove("access_token");
-    		//editor.remove("access_expires");
-    		//editor.commit();
-    		Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
+	          SharedPreferences.Editor editor = mPrefs.edit();
+    		  editor.remove("access_token");
+    		  editor.remove("access_expires");
+    		  editor.commit();
+	        }
+    		 Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
     		//REFRESH THIS ACTIVITY TO CLEAN DATA
     		Intent refresh = new Intent(context,LoginActivity.class);
     		context.startActivity(refresh);
 	    }
 
 	}//END LOGOUT FACEBOOK
+	
 
 	
 }//END CLASS

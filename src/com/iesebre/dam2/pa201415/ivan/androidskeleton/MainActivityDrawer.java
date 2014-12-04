@@ -53,6 +53,7 @@ public class MainActivityDrawer extends ActionBarActivity implements
 		mTitle = getTitle();
 
 		// Set up the drawer.
+		//WE DON'T WANT THIS CHANGE IT
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
 		}
@@ -79,13 +80,12 @@ public class MainActivityDrawer extends ActionBarActivity implements
 			        break;
 			     case 1:
 			    	 Log.w(this.getClass().getSimpleName(), "Section 1");
-			    	  //LET'S GO TO LOGOUT
-				        Intent logOutAll = new Intent();
-					    setResult(9999,logOutAll);
-					    finish();
+			    	  logout();
 			        break;
 			     case 2:
 			    	 Log.w(this.getClass().getSimpleName(), "Section 2");
+			    	 //REVOKE PERMISSIONS
+			    	 logout(true);
 			        break;
 			     default:
 			        Log.w(this.getClass().getSimpleName(), "Reached Default in onNavigationDrawerItemSelected!");
@@ -103,6 +103,20 @@ public class MainActivityDrawer extends ActionBarActivity implements
 			     restoreActionBar();
 			  }		
 		}
+	//OVERLOADING METHODS TO LOGOUT
+	   private void logout(){
+		   Log.d("Logout","logout");
+		   logout(false);
+		   
+	   }
+	   private void logout(boolean revoke){
+		   Log.d("Logout","logout parametro "+revoke);
+		  Intent logOutAll = new Intent();
+           //LET'S GO TO LOGOUT
+		  logOutAll.putExtra(BaseUtils.REVOKE,revoke);
+		  setResult(9999,logOutAll);
+		  finish();
+	   }
 
 	public void onSectionAttached(int number) {
 		switch (number) {
