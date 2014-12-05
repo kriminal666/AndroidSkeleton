@@ -253,7 +253,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
-					progressDialog.dismiss();
+					progressDialog.hide();
 					Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
                     Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
 					startActivityForResult(loginTwitter,TWITTER_REQUEST);	
@@ -342,7 +342,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		// Update the UI after signin
 		//HIDE PROGRESSDIALOG
 		Log.d("Logout","paramos progress google");
-		//progressDialog.dismiss();
+		progressDialog.hide();
 		Log.d("Logout","Tras parar el progress dialog");
 		updateUI(true);		
 		
@@ -388,7 +388,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		case R.id.btnGplus:
 			// Sign in button clicked
 			Log.d("Logout","se activa el progress");
-			//ProgressDialog.show(LoginActivity.this,"","Loading");
+			ProgressDialog.show(LoginActivity.this,"","Loading");
 			signInWithGplus();
 			break;
 		}
@@ -517,8 +517,13 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		//GET INTENT DATA
-		boolean extras= data.getBooleanExtra(BaseUtils.REVOKE,false);
+		     //Default value not revoke
+		     boolean revoke=false;
+		     Bundle extras=data.getExtras();
+		     if(extras!=null){
+		    	revoke = data.getBooleanExtra(BaseUtils.REVOKE,false); 
+		     }
+		    //GET INTENT DATA
 		Log.d("Logout","onActivityrResult :"+extras);
 		//For google
 		if (requestCode == RC_SIGN_IN) {
@@ -533,26 +538,27 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			}
 		}
 		//logout               if exists extras and it's true or false
-		if((resultCode==9999)&&((extras)||(!extras))){
+		if(resultCode==9999){
 		  switch (requestCode) {
 		    case FACE_REQUEST :
 		     //IF FACEBOOK CALL LOGOUT
-			 logoutFromFacebook(this,extras);
+			 logoutFromFacebook(this,revoke);
 			 break;
 		    case TWITTER_REQUEST :
 		    	//IF TWITTER CALL LOGOUT
 		    	if(isTwitterLoggedInAlready()){
-		    		logoutFromTwitter(extras);
+		    		logoutFromTwitter(revoke);
 		    		break;
 		    	}
 		    case GOOGLE_REQUEST :
 		    	//IF GOOGLE+ CALL LOGOUT OR REVOKE
-		    	if(extras){
+		    	if(revoke){
 		    	 revokeGplusAccess();
-		    	}
+		    	}else{
 		    	signOutFromGplus();
 		    	
 		    	}
+		  }
 		}
 		//for facebook
 		super.onActivityResult(requestCode, resultCode, data);
