@@ -53,7 +53,7 @@ public class MainActivityDrawer extends ActionBarActivity implements
 		mTitle = getTitle();
 
 		// Set up the drawer.
-		//WE DON'T WANT THIS CHANGE IT
+		//WE DON'T WANT THIS, CHANGE IT
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
 		}
@@ -105,12 +105,10 @@ public class MainActivityDrawer extends ActionBarActivity implements
 		}
 	//OVERLOADING METHODS TO LOGOUT
 	   private void logout(){
-		   Log.d("Logout","logout");
 		   logout(false);
 		   
 	   }
 	   private void logout(boolean revoke){
-		   Log.d("Logout","logout parametro "+revoke);
 		  Intent logOutAll = new Intent();
            //LET'S GO TO LOGOUT
 		  logOutAll.putExtra(BaseUtils.REVOKE,revoke);

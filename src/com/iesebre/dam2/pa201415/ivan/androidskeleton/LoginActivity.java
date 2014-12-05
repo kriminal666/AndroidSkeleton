@@ -131,16 +131,15 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	Context context;
 	//PERSONAL PROGRESS DIALOG
 	private ProgressDialog progressDialog;
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		//For toasts
 		context = getApplicationContext();
-	   //INIT PROGRESS DIALOG
-		progressDialog =  new ProgressDialog(this);
-		
+	   
+		progressDialog =  new ProgressDialog(LoginActivity.this);
+		progressDialog.setMessage("Loading..");
 		
 		//FACEBOOK CONTROLS
 		btnFbLogin = (Button) findViewById(R.id.btnFb);
@@ -212,7 +211,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			public void onClick(View arg0) {
 				// Call login twitter function
 				//new LoginToTwitter().execute();
-				ProgressDialog.show(LoginActivity.this,"","Loading...");
+				//INIT PROGRESS DIALOG
+				
+				progressDialog.show();
 				loginToTwitter();
 			}
 		});
@@ -224,7 +225,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		 * Verifier
 		 * */
 		
-		
+		Log.d("Logout", "onCreate valor twitter"+isTwitterLoggedInAlready());
 		if (!isTwitterLoggedInAlready()) {
 			
 			//GET THE FUCKING URI FROM SPLASH IF WE ARE REDIRECTED FROM TWITTER
@@ -253,7 +254,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
-					progressDialog.hide();
+					  progressDialog.dismiss();
 					Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
                     Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
 					startActivityForResult(loginTwitter,TWITTER_REQUEST);	
@@ -264,7 +265,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			}
 			//IF WE ARE CONNECTED TO TWITTER GO TO DRAWER ACTIVITY
 		}else{
-			
+			Log.d("Logout", "onCreate valor twitter en el else"+isTwitterLoggedInAlready());
+			//STOP PROGRESS DIALOG ACTIVATED ONCLICK LOGIN
+			progressDialog.dismiss();
             Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
 			startActivityForResult(loginTwitter,TWITTER_REQUEST);
 		}
@@ -273,7 +276,6 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	
 	//GOOGLE METHODS
 	protected void onStart() {
-		Log.d("Logout","onStart");
 		super.onStart();
 		mGoogleApiClient.connect();
 		
@@ -293,16 +295,11 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * Method to resolve any sign in errors
 	 * */
 	private void resolveSignInError() {
-		Log.d("Logout","resolveSignError");
 		if (mConnectionResult.hasResolution()) {
-			Log.d("Logout","Pasa el if");
 			try {
 				mIntentInProgress = true;
-				Log.d("Logout","antes de startResolution");
 				mConnectionResult.startResolutionForResult(this, RC_SIGN_IN);
-				Log.d("Logout","Después de startResolution");
 			} catch (SendIntentException e) {
-				Log.d("Logout","Salta escepcion");
 				mIntentInProgress = false;
 				mGoogleApiClient.connect();
 			}
@@ -310,7 +307,6 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	}
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
-		Log.d("Logout","onconnectionFailed");
 		if (!result.hasResolution()) {
 			GooglePlayServicesUtil.getErrorDialog(result.getErrorCode(), this,
 					0).show();
@@ -340,9 +336,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		//getProfileInformation();
 		
 		// Update the UI after signin
-		//HIDE PROGRESSDIALOG
+		//STOP PROGRESSDIALOG
 		Log.d("Logout","paramos progress google");
-		progressDialog.hide();
+		   progressDialog.dismiss();
 		Log.d("Logout","Tras parar el progress dialog");
 		updateUI(true);		
 		
@@ -368,7 +364,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	}
 	@Override
 	public void onConnectionSuspended(int arg0) {
-		Log.d("Logout","onConnectionSuspended");
+		
 		mGoogleApiClient.connect();
 		updateUI(false);
 	}
@@ -387,8 +383,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		switch (v.getId()) {
 		case R.id.btnGplus:
 			// Sign in button clicked
-			Log.d("Logout","se activa el progress");
-			ProgressDialog.show(LoginActivity.this,"","Loading");
+			Log.d("Logout","se activa el progress de google");
+		   progressDialog.show();
 			signInWithGplus();
 			break;
 		}
@@ -518,13 +514,15 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		     //Default value not revoke
-		     boolean revoke=false;
-		     Bundle extras=data.getExtras();
-		     if(extras!=null){
-		    	revoke = data.getBooleanExtra(BaseUtils.REVOKE,false); 
+		     boolean revoke = false;
+		     //IF NULL APP GOES DOWN SO WE NEED TO TEST IT
+		     if(data!=null){
+		        Bundle extras=data.getExtras();
+		          if(extras!=null){
+		        	//GET INTENT DATA EXTRAS  
+		    	    revoke = data.getBooleanExtra(BaseUtils.REVOKE,false); 
+		          }
 		     }
-		    //GET INTENT DATA
-		Log.d("Logout","onActivityrResult :"+extras);
 		//For google
 		if (requestCode == RC_SIGN_IN) {
 			if (resultCode != RESULT_OK) {
@@ -537,7 +535,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 				mGoogleApiClient.connect();
 			}
 		}
-		//logout               if exists extras and it's true or false
+		//logout 
 		if(resultCode==9999){
 		  switch (requestCode) {
 		    case FACE_REQUEST :
@@ -546,10 +544,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			 break;
 		    case TWITTER_REQUEST :
 		    	//IF TWITTER CALL LOGOUT
-		    	if(isTwitterLoggedInAlready()){
-		    		logoutFromTwitter(revoke);
+		          logoutFromTwitter(revoke);
 		    		break;
-		    	}
 		    case GOOGLE_REQUEST :
 		    	//IF GOOGLE+ CALL LOGOUT OR REVOKE
 		    	if(revoke){
@@ -574,7 +570,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		
 		String oauth_token = mSharedPreferences.getString(PREF_KEY_OAUTH_TOKEN, null);
 		String oauth_secret = mSharedPreferences.getString(PREF_KEY_OAUTH_SECRET,null);
-		
+		Log.d("Logout","loginTwitter valor conected"+isTwitterLoggedInAlready());
 		if (!isTwitterLoggedInAlready()) {
 			if ((oauth_token==null)&&(oauth_secret==null)){
 			ConfigurationBuilder builder = new ConfigurationBuilder();
@@ -593,25 +589,19 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			} catch (TwitterException e) {
 				e.printStackTrace();
 			}
-		   }else {
+		   }
+	    }else {
+			   Log.d("Logout","Login twitter llegamos al else");
 			      //HIDE PROGRESS DIALOG
 			      progressDialog.dismiss();
 				// user logged into twitter if we have tokens
 			   Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
-				// EDIT PREFERENCES
-			   SharedPreferences.Editor editor = mSharedPreferences.edit();
-				// Store login status - true
-				editor.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
-				editor.commit(); // save changes
-				  //INTENT TO GO TO DRAWER ACTIVITY IF WE HAVE LOGGED IN ONCE BEFORE
-	     
-				Intent stillLogged = new Intent(LoginActivity.this,MainActivityDrawer.class);
+			 //INTENT TO GO TO DRAWER ACTIVITY IF WE HAVE LOGGED IN ONCE BEFORE
+	            Intent stillLogged = new Intent(LoginActivity.this,MainActivityDrawer.class);
 		        startActivityForResult(stillLogged,TWITTER_REQUEST);
 		        finish();
 		} 
 	        
-	
-		}
 	}
 
 		/**
@@ -622,21 +612,18 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 private void logoutFromTwitter(boolean revoke) {
 		// Clear the shared preferences
 		 Log.d("Logout","logout twiitter"+revoke);
-		Editor e = mSharedPreferences.edit();
+		
 		//IF WE WANT TO REVOKE REMOVE TOKENS
 		 if(revoke){
-			 Log.d("Logout","logout twitter limpiamos token"); 
+			 Log.d("Logout","Pasa el if de revoke");
+		  Editor e = mSharedPreferences.edit();
+		  Log.d("Logout","logout twitter limpiamos token"); 
 		  e.remove(PREF_KEY_OAUTH_TOKEN);
 		  e.remove(PREF_KEY_OAUTH_SECRET);
+		  e.remove(PREF_KEY_TWITTER_LOGIN);
+		  e.commit();
 		 }
-		e.remove(PREF_KEY_TWITTER_LOGIN);
-		e.commit();
-		/*	
-		//Cierra toda la aplicación
-		Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-	    homeIntent.addCategory( Intent.CATEGORY_HOME );
-	    homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  
-	    startActivity(homeIntent); */
+		 
 		Toast.makeText(context,"User disconnected from Twitter", Toast.LENGTH_LONG).show();
 		}
 
@@ -660,17 +647,14 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 */
 	public void logoutFromFacebook(Context context,boolean revoke) {
 	    Session session = Session.getActiveSession();
-	    Log.d("Logout","logout facebook"+revoke);
+	   
 	    //Normally Dont pass through this if
 	    if (session != null) {
-	    	Log.d("Logout","pasa primer if");
-	    	Log.d("Logout","valor "+session.isClosed());
 	    	//We change if  if(!session.isclosed)
 	        if (session.isClosed()) {
 	        	session.closeAndClearTokenInformation();
 	        	//IF WE WANT TO REVOKE
 	        	if(revoke){
-	        		Log.d("Logout","limpiamos token");
 	            //CLEAR FACEBOOK PREFERENCES
 	             SharedPreferences.Editor editor = mPrefs.edit();
 	    		 editor.remove("access_token");
@@ -687,7 +671,6 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	        session.closeAndClearTokenInformation();
 	        //IF WE WANT TO REVOKE
 	        if(revoke){
-	        	 Log.d("Logout","logout facebook, limpiamos token");
 	         //CLEAR FACEBOOK PREFERENCES
 	          SharedPreferences.Editor editor = mPrefs.edit();
     		  editor.remove("access_token");
