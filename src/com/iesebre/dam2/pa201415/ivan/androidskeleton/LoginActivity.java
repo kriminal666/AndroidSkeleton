@@ -1,20 +1,5 @@
 package com.iesebre.dam2.pa201415.ivan.androidskeleton;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.facebook.Session;
-import com.facebook.android.AsyncFacebookRunner;
-import com.facebook.android.AsyncFacebookRunner.RequestListener;
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.FacebookError;
-
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -40,18 +25,20 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
-
+import com.facebook.Session;
+import com.facebook.android.AsyncFacebookRunner;
+import com.facebook.android.DialogError;
+import com.facebook.android.Facebook;
+import com.facebook.android.Facebook.DialogListener;
+import com.facebook.android.FacebookError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.plus.Plus;
-import com.google.android.gms.plus.model.people.Person;
-import com.iesebre.dam2.pa201415.ivan.androidskeleton.R;
 
 
 
@@ -137,6 +124,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	private Button btnSignIn;
 	//GOOGLE REQUEST
 	private static final int GOOGLE_REQUEST = 3;
+
+	private static final int DIALOG_PLAY_SERVICES_ERROR = 91;
 	//END GOOGLE CAMPS
     //PERSONAL CAMP FOR TOAST
 	Context context;
@@ -151,6 +140,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		context = getApplicationContext();
 	   //INIT PROGRESS DIALOG
 		progressDialog =  new ProgressDialog(this);
+		
 		
 		//FACEBOOK CONTROLS
 		btnFbLogin = (Button) findViewById(R.id.btnFb);
@@ -222,7 +212,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			public void onClick(View arg0) {
 				// Call login twitter function
 				//new LoginToTwitter().execute();
-				ProgressDialog.show(LoginActivity.this,"","Loading");
+				ProgressDialog.show(LoginActivity.this,"","Loading...");
 				loginToTwitter();
 			}
 		});
@@ -263,7 +253,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
-					progressDialog.hide();
+					progressDialog.dismiss();
 					Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
                     Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
 					startActivityForResult(loginTwitter,TWITTER_REQUEST);	
@@ -283,6 +273,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	
 	//GOOGLE METHODS
 	protected void onStart() {
+		Log.d("Logout","onStart");
 		super.onStart();
 		mGoogleApiClient.connect();
 		
@@ -302,11 +293,16 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * Method to resolve any sign in errors
 	 * */
 	private void resolveSignInError() {
+		Log.d("Logout","resolveSignError");
 		if (mConnectionResult.hasResolution()) {
+			Log.d("Logout","Pasa el if");
 			try {
 				mIntentInProgress = true;
+				Log.d("Logout","antes de startResolution");
 				mConnectionResult.startResolutionForResult(this, RC_SIGN_IN);
+				Log.d("Logout","Después de startResolution");
 			} catch (SendIntentException e) {
+				Log.d("Logout","Salta escepcion");
 				mIntentInProgress = false;
 				mGoogleApiClient.connect();
 			}
@@ -314,6 +310,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	}
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
+		Log.d("Logout","onconnectionFailed");
 		if (!result.hasResolution()) {
 			GooglePlayServicesUtil.getErrorDialog(result.getErrorCode(), this,
 					0).show();
@@ -345,7 +342,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		// Update the UI after signin
 		//HIDE PROGRESSDIALOG
 		Log.d("Logout","paramos progress google");
-		progressDialog.hide();
+		//progressDialog.dismiss();
+		Log.d("Logout","Tras parar el progress dialog");
 		updateUI(true);		
 		
 
@@ -370,6 +368,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	}
 	@Override
 	public void onConnectionSuspended(int arg0) {
+		Log.d("Logout","onConnectionSuspended");
 		mGoogleApiClient.connect();
 		updateUI(false);
 	}
@@ -388,8 +387,8 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		switch (v.getId()) {
 		case R.id.btnGplus:
 			// Sign in button clicked
-			Log.d("Logout","seactiva el progress");
-			ProgressDialog.show(LoginActivity.this,"","Loading");
+			Log.d("Logout","se activa el progress");
+			//ProgressDialog.show(LoginActivity.this,"","Loading");
 			signInWithGplus();
 			break;
 		}
@@ -398,7 +397,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * Sign-in into google
 	 * */
 	private void signInWithGplus() {
+		Log.d("Logout","signgoogle");
 		if (!mGoogleApiClient.isConnecting()) {
+			Log.d("Logout","pasa el if");
 			mSignInClicked = true;
 			resolveSignInError();
 		}
@@ -422,6 +423,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * Revoking access from google
 	 * */
 	private void revokeGplusAccess() {
+		Log.d("Logout","revokeGPlus");
 		 Log.d("Logout","revoke google");
 		if (mGoogleApiClient.isConnected()) {
 			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
@@ -587,7 +589,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			}
 		   }else {
 			      //HIDE PROGRESS DIALOG
-			      progressDialog.hide();
+			      progressDialog.dismiss();
 				// user logged into twitter if we have tokens
 			   Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
 				// EDIT PREFERENCES
@@ -668,11 +670,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	    		 editor.remove("access_token");
 	    		 editor.remove("access_expires");
 	    		 editor.commit();
+	    		 Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
 	        	}
-	    		
-	    		Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
-	    		
-	        }
+	      }
 	    } else {
 	    	//Normally it comes here..
 	        session = new Session(context);
