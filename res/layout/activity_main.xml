@@ -21,17 +21,6 @@
         android:orientation="vertical"
         android:padding="10dp" >
 
-        <!---
-        <com.google.android.gms.common.SignInButton
-            android:id="@+id/btnGplus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:paddingBottom="0dp"
-            android:paddingLeft="0dp"
-            android:paddingRight="0dp"
-            android:paddingTop="0dp"
-            android:text="@string/google" /> -->
         
         <Button
             android:id="@+id/btnGplus"
@@ -96,7 +85,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="ENTER USER NAME"
+            android:hint="@string/user"
             android:paddingBottom="10dp" >
 
             <requestFocus />
@@ -105,7 +94,7 @@
         <EditText
             android:layout_width="262dp"
             android:layout_height="match_parent"
-            android:hint="ENTER PASSWORD"
+            android:hint="@string/passwd"
             android:inputType="textPassword"
             android:paddingBottom="10dp" />
 
@@ -120,7 +109,15 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/btnPersonalLogin" />
-    </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/chkRemember"
+            android:layout_width="126dp"
+            android:layout_height="wrap_content"
+            android:text="@string/remember"
+            android:checked="false" />
+            
+                </LinearLayout>
 
 </RelativeLayout>
 

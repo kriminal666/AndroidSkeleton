@@ -11,6 +11,9 @@
     <string name="splashtxt">Cargando la aplicación, espere por favor.</string>
     <string name="personalLogin">Personal Login</string>
     <string name="btnPersonalLogin">LOGIN</string>
+    <string name="remember">Remember</string>
+    <string name="user">ENTER USER NAME</string>
+    <string name="passwd">ENTER PASSWORD</string>
 
     <style name="ButtonText">
         <item name="android:layout_width">fill_parent</item>

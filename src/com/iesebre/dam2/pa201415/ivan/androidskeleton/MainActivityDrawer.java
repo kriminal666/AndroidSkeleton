@@ -56,6 +56,9 @@ public class MainActivityDrawer extends ActionBarActivity implements
 		//WE DON'T WANT THIS, CHANGE IT
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
 				(DrawerLayout) findViewById(R.id.drawer_layout));
+		
+		
+		
 		}
 
 
