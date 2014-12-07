@@ -112,11 +112,15 @@ public class MainActivityDrawer extends ActionBarActivity implements
 		   
 	   }
 	   private void logout(boolean revoke){
+		   try{
 		  Intent logOutAll = new Intent();
            //LET'S GO TO LOGOUT
 		  logOutAll.putExtra(BaseUtils.REVOKE,revoke);
 		  setResult(9999,logOutAll);
 		  finish();
+		   }catch(Exception e){
+			   Log.i("exception ", e.getMessage());
+		   }
 	   }
 
 	public void onSectionAttached(int number) {

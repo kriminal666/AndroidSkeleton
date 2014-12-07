@@ -271,7 +271,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
             Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
 			startActivityForResult(loginTwitter,TWITTER_REQUEST);
 		}
-
+        
 	}//End of method onCreate
 	
 	//GOOGLE METHODS
@@ -442,13 +442,14 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * */
 	@SuppressWarnings("deprecation")
 	public void loginToFacebook() {
-
+        Log.d("Logout","LLegamos al login facebook");
 		mPrefs = getPreferences(MODE_PRIVATE);
 		String access_token = mPrefs.getString("access_token", null);
 		long expires = mPrefs.getLong("access_expires", 0);
 		//If we have been logged before set the access token and expires
         
 		if (access_token != null) {
+			Log.d("Logout","Pasa el if del token"+access_token);
 			facebook.setAccessToken(access_token);
 		//Actions when login
 			Log.d("loginface","login facebook 1");
@@ -457,11 +458,12 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		}
 
 		if (expires != 0) {
+			Log.d("Logout","Pasa el if de expires "+expires);
 			facebook.setAccessExpires(expires);
 		}
         //Check if session is really valid
 		if (!facebook.isSessionValid()) {
-			Log.d("Logout","La sesión ha dado que no");
+			Log.d("Logout","La sesión ha dado que no es valida");
 			facebook.authorize(this,
 					new String[] { "email", "publish_stream" },
 					new DialogListener() {
@@ -502,6 +504,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 
 					});
 		}else{
+			Log.d("Logout","llega al else, la sesión es válida hace el intent a la drawer");
 			//If we have been logged before and session is valid
 			Toast.makeText(context,"User connected to Facebook", Toast.LENGTH_LONG).show();
 			//LET'S GO TO ANOTHER ACTIVITY
@@ -513,6 +516,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		      Log.d("Logout","llegamos a onactivityresult ");
 		     //Default value not revoke
 		     boolean revoke = false;
 		     //IF NULL APP GOES DOWN SO WE NEED TO TEST IT
@@ -544,6 +548,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			 break;
 		    case TWITTER_REQUEST :
 		    	//IF TWITTER CALL LOGOUT
+		    	 Log.d("Logout","antes de llamar al logout de twitter "+isTwitterLoggedInAlready()+","+revoke); 
 		          logoutFromTwitter(revoke);
 		    		break;
 		    case GOOGLE_REQUEST :
@@ -589,11 +594,16 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			} catch (TwitterException e) {
 				e.printStackTrace();
 			}
-		   }
-	    }else {
+		 //IF istwitterLoggedInAlready is false but we have the tokens go to drawer
+		   }else {
 			   Log.d("Logout","Login twitter llegamos al else");
 			      //HIDE PROGRESS DIALOG
 			      progressDialog.dismiss();
+			      //Edit preferences
+			      Editor e = mSharedPreferences.edit();
+			   // Store login status - true
+					e.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
+					e.commit(); // save changes
 				// user logged into twitter if we have tokens
 			   Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
 			 //INTENT TO GO TO DRAWER ACTIVITY IF WE HAVE LOGGED IN ONCE BEFORE
@@ -601,6 +611,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		        startActivityForResult(stillLogged,TWITTER_REQUEST);
 		        finish();
 		} 
+	    }
 	        
 	}
 
@@ -622,6 +633,12 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		  e.remove(PREF_KEY_OAUTH_SECRET);
 		  e.remove(PREF_KEY_TWITTER_LOGIN);
 		  e.commit();
+		  //If we don't want to revoke just clean status and keep tokens
+		 }else{
+			 Log.d("Logout","No es un revoke, limpiamos solo el estatus");
+			 Editor e = mSharedPreferences.edit();
+			 e.remove(PREF_KEY_TWITTER_LOGIN);
+			 e.commit();
 		 }
 		 
 		Toast.makeText(context,"User disconnected from Twitter", Toast.LENGTH_LONG).show();
@@ -647,23 +664,26 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 */
 	public void logoutFromFacebook(Context context,boolean revoke) {
 	    Session session = Session.getActiveSession();
-	   
+	   Log.d("Logout","logout facebook");
 	    //Normally Dont pass through this if
 	    if (session != null) {
+	    	Log.d("Logout","Pasa el if de session : "+session);
 	    	//We change if  if(!session.isclosed)
 	        if (session.isClosed()) {
+	        	Log.d("Logout","Pasa el if de session is closed"+session.isClosed());
 	        	session.closeAndClearTokenInformation();
 	        	//IF WE WANT TO REVOKE
 	        	if(revoke){
+	        		Log.d("Logout","Pasa el if de revoke");
 	            //CLEAR FACEBOOK PREFERENCES
 	             SharedPreferences.Editor editor = mPrefs.edit();
 	    		 editor.remove("access_token");
 	    		 editor.remove("access_expires");
 	    		 editor.commit();
-	    		 Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
 	        	}
 	      }
 	    } else {
+	    	Log.d("Logout","llega al else");
 	    	//Normally it comes here..
 	        session = new Session(context);
 	        Session.setActiveSession(session);
@@ -671,18 +691,20 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	        session.closeAndClearTokenInformation();
 	        //IF WE WANT TO REVOKE
 	        if(revoke){
+	        	Log.d("Logout","pasa el if de revoke y limpiamos los token");
 	         //CLEAR FACEBOOK PREFERENCES
 	          SharedPreferences.Editor editor = mPrefs.edit();
     		  editor.remove("access_token");
     		  editor.remove("access_expires");
     		  editor.commit();
 	        }
-    		 Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
-    		//REFRESH THIS ACTIVITY TO CLEAN DATA
-    		Intent refresh = new Intent(context,LoginActivity.class);
-    		context.startActivity(refresh);
+	        
 	    }
-
+	    Log.d("Logout","Refrescamos la pantalla despues de logout facebook");
+		 Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
+		//REFRESH THIS ACTIVITY TO CLEAN DATA
+		Intent refresh = new Intent(context,LoginActivity.class);
+		context.startActivity(refresh);
 	}//END LOGOUT FACEBOOK
 	
 
