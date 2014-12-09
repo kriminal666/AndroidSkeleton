@@ -8,6 +8,7 @@ import twitter4j.auth.RequestToken;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -54,7 +55,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		String FILENAME = "AndroidSSO_data";
 		private static SharedPreferences mPrefs;
 		private String FACEBOOK_LOGIN = "Facebook_Login";
-		private static final int FACE_REQUEST = 1;
+		private static final int FACE_REQUEST = 78452301;
 		//FACEBOOK BUTTON
 		Button btnFbLogin;
 		//END FACEBOOK CAMPS
@@ -74,7 +75,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	static final String PREF_KEY_OAUTH_SECRET = "oauth_token_secret";
 	static final String PREF_KEY_TWITTER_LOGIN = "isTwitterLogedIn";
     //TWITTER REQUEST
-	private static final int TWITTER_REQUEST = 2;
+	private static final int TWITTER_REQUEST = 789012;
 	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
 
 	// Twitter oauth urls
@@ -123,7 +124,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	//private SignInButton btnSignIn;
 	private Button btnSignIn;
 	//GOOGLE REQUEST
-	private static final int GOOGLE_REQUEST = 3;
+	private static final int GOOGLE_REQUEST = 98702341;
 
 	private static final int DIALOG_PLAY_SERVICES_ERROR = 91;
 	//END GOOGLE CAMPS
@@ -230,6 +231,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			
 			//GET THE FUCKING URI FROM SPLASH IF WE ARE REDIRECTED FROM TWITTER
 			Uri uri = getIntent().getData();
+			Log.d("Logout","la uri ="+uri);
 			if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
 				
 				// oAuth verifier
@@ -253,6 +255,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 					e.commit(); // save changes
 
 					Log.e("Twitter OAuth Token", "> " + accessToken.getToken());
+				
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
 					  progressDialog.dismiss();
 					Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
@@ -519,12 +522,12 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		      Log.d("Logout","llegamos a onactivityresult ");
 		     //Default value not revoke
 		     boolean revoke = false;
-		     //IF NULL APP GOES DOWN SO WE NEED TO TEST IT
+		   //IF NULL APP GOES DOWN SO WE NEED TO TEST IT
 		     if(data!=null){
 		        Bundle extras=data.getExtras();
 		          if(extras!=null){
 		        	//GET INTENT DATA EXTRAS  
-		    	    revoke = data.getBooleanExtra(BaseUtils.REVOKE,false); 
+		    	  revoke = data.getBooleanExtra(BaseUtils.REVOKE,false);
 		          }
 		     }
 		//For google
@@ -595,22 +598,17 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 				e.printStackTrace();
 			}
 		 //IF istwitterLoggedInAlready is false but we have the tokens go to drawer
-		   }else {
+		   }
+		}else {
 			   Log.d("Logout","Login twitter llegamos al else");
 			      //HIDE PROGRESS DIALOG
 			      progressDialog.dismiss();
-			      //Edit preferences
-			      Editor e = mSharedPreferences.edit();
-			   // Store login status - true
-					e.putBoolean(PREF_KEY_TWITTER_LOGIN, true);
-					e.commit(); // save changes
-				// user logged into twitter if we have tokens
+			// user logged into twitter if 
 			   Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
 			 //INTENT TO GO TO DRAWER ACTIVITY IF WE HAVE LOGGED IN ONCE BEFORE
 	            Intent stillLogged = new Intent(LoginActivity.this,MainActivityDrawer.class);
 		        startActivityForResult(stillLogged,TWITTER_REQUEST);
-		        finish();
-		} 
+		        this.finish(); 
 	    }
 	        
 	}
@@ -633,13 +631,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		  e.remove(PREF_KEY_OAUTH_SECRET);
 		  e.remove(PREF_KEY_TWITTER_LOGIN);
 		  e.commit();
-		  //If we don't want to revoke just clean status and keep tokens
-		 }else{
-			 Log.d("Logout","No es un revoke, limpiamos solo el estatus");
-			 Editor e = mSharedPreferences.edit();
-			 e.remove(PREF_KEY_TWITTER_LOGIN);
-			 e.commit();
+		  
 		 }
+		//If we don't want to revoke nothing to do
 		 
 		Toast.makeText(context,"User disconnected from Twitter", Toast.LENGTH_LONG).show();
 		}

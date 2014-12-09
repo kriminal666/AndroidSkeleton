@@ -112,15 +112,16 @@ public class MainActivityDrawer extends ActionBarActivity implements
 		   
 	   }
 	   private void logout(boolean revoke){
-		   try{
+		 Log.d("Logout","Método logout del drawer");
 		  Intent logOutAll = new Intent();
+		  Log.d("Logout","tras declarar el intent");
            //LET'S GO TO LOGOUT
 		  logOutAll.putExtra(BaseUtils.REVOKE,revoke);
+		  Log.d("Logout","cargar setresult");
 		  setResult(9999,logOutAll);
+		  Log.d("Logout","tras cargar result");
 		  finish();
-		   }catch(Exception e){
-			   Log.i("exception ", e.getMessage());
-		   }
+		  Log.d("Logout","finish");
 	   }
 
 	public void onSectionAttached(int number) {
