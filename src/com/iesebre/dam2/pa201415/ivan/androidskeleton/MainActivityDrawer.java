@@ -99,6 +99,7 @@ public class MainActivityDrawer extends ActionBarActivity implements
 			  {
 			     FragmentTransaction ft = fragmentManager.beginTransaction();
 			     ft.replace(R.id.container, fragment);
+			     //al pulsar el volver del movil vuelve al fragmento anterior si no, a la actividad anterior
 			     ft.addToBackStack(null);
 			     ft.commit();
 			     //mTitle = getString(((GetActionBarTitle) fragment).getActionBarTitleId());
