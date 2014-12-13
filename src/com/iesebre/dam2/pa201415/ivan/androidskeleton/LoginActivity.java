@@ -19,6 +19,8 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -27,11 +29,12 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.facebook.Session;
-import com.facebook.android.AsyncFacebookRunner;
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.FacebookError;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.AppEventsLogger;
+import com.facebook.HttpMethod;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -40,24 +43,29 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.plus.Plus;
+import com.iesebre.dam2.pa201415.ivan.androidskeleton.LoginActivityFragment;
+
 
 
 //Cambiar esto por extends fragmentactivity
-public class LoginActivity extends Activity implements OnClickListener,ConnectionCallbacks,OnConnectionFailedListener {
+public class LoginActivity extends FragmentActivity implements
+                     OnClickListener,ConnectionCallbacks,OnConnectionFailedListener,LoginActivityFragment.OnFragmentInteractionListener{
 	//BEGIN FACEBOOK
 	// Your Facebook APP ID
 		private static String APP_ID = "714569478638464"; // Replace with your App ID
+		private UiLifecycleHelper uiHelper;
+	    private Session.StatusCallback callback = new Session.StatusCallback() {
+	        @Override
+	        public void call(Session session, SessionState state, Exception exception) {
+	            onSessionStateChange(session, state, exception);
+	        }
+	    };
+	    
+	    private boolean isResumed = false;
+	
 
-		// Instance of Facebook Class
-		@SuppressWarnings("deprecation")
-		private Facebook facebook = new Facebook(APP_ID);
-		private AsyncFacebookRunner mAsyncRunner;
-		String FILENAME = "AndroidSSO_data";
-		private static SharedPreferences mPrefs;
-		private String FACEBOOK_LOGIN = "Facebook_Login";
 		private static final int FACE_REQUEST = 78452301;
-		//FACEBOOK BUTTON
-		Button btnFbLogin;
+		
 		//END FACEBOOK CAMPS
 	
 		//BEGIN TWITTER
@@ -82,9 +90,6 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	static final String URL_TWITTER_AUTH = "auth_url";
 	static final String URL_TWITTER_OAUTH_VERIFIER = "oauth_verifier";
 	static final String URL_TWITTER_OAUTH_TOKEN = "oauth_token";
-
-	// Login button
-	Button btnTwitter;
 
 
 	// Progress dialog
@@ -122,7 +127,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	private ConnectionResult mConnectionResult;
     //we need just one button
 	//private SignInButton btnSignIn;
-	private Button btnSignIn;
+	
 	//GOOGLE REQUEST
 	private static final int GOOGLE_REQUEST = 98702341;
 
@@ -138,6 +143,14 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		//Fragment code
+		if (savedInstanceState == null) {
+			getSupportFragmentManager().beginTransaction()
+					.add(R.id.login_activitycontainer, new LoginActivityFragment()).commit();
+		}
+		
+		
+		
 		//Aquí añade un if para los fragments hay que pasarle un framelayout y
 		//cargar el fragmento nuevo donde van los botones
 		//For toasts
@@ -146,26 +159,17 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		progressDialog =  new ProgressDialog(LoginActivity.this);
 		progressDialog.setMessage("Loading..");
 		
-		//FACEBOOK CONTROLS
-		btnFbLogin = (Button) findViewById(R.id.btnFb);
-		mAsyncRunner = new AsyncFacebookRunner(facebook);
-		//End facebook controls
+		
+		
 		//BEGIN FACEBOOK CODE
-		/**
-		 * Login button Click event
-		 * */
-		btnFbLogin.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Log.d("Image Button", "button Clicked");
-				 loginToFacebook();
-			}
-		});
-		//END FACEBOOK CLICK
+		//FACEBOOK
+				uiHelper = new UiLifecycleHelper(this, callback);
+		        uiHelper.onCreate(savedInstanceState);
+		
+		//END FACEBOOK 
+		        
 		//GOOGLE CONTROLS
-		btnSignIn = (Button) findViewById(R.id.btnGplus);
-		btnSignIn.setOnClickListener(this);
+		
 		mGoogleApiClient = new GoogleApiClient.Builder(this)
 		.addConnectionCallbacks(this)
 		.addOnConnectionFailedListener(this).addApi(Plus.API)
@@ -198,30 +202,10 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			// stop executing code by return
 			return;
 		}
-		
-		// All UI elements
-		btnTwitter = (Button) findViewById(R.id.btnTwitter);
 	
-
-		// Shared Preferences
+		// Shared Preferences twitter
 		mSharedPreferences = getApplicationContext().getSharedPreferences(
 				"MyPref", 0);
-
-		/**
-		 * Twitter login button click event will call loginToTwitter() function
-		 * */
-		btnTwitter.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View arg0) {
-				// Call login twitter function
-				//new LoginToTwitter().execute();
-				//INIT PROGRESS DIALOG
-				
-				progressDialog.show();
-				loginToTwitter();
-			}
-		});
 		
 		
 		
@@ -275,6 +259,27 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	
         
 	}//End of method onCreate
+	
+	private void onSessionStateChange(Session session, SessionState state, Exception exception) {
+		Log.d(TAG,"onSessionStateChange!");
+        if (isResumed) {
+        	
+            FragmentManager manager = getSupportFragmentManager();
+            int backStackSize = manager.getBackStackEntryCount();
+            for (int i = 0; i < backStackSize; i++) {
+                manager.popBackStack();
+            }
+            // check for the OPENED state instead of session.isOpened() since for the
+            // OPENED_TOKEN_UPDATED state, the selection fragment should already be showing.
+            if (state.equals(SessionState.OPENED)) {
+            	
+            	Intent i = new Intent(LoginActivity.this, MainActivityDrawer.class);
+        		startActivityForResult(i, FACE_REQUEST);
+            } else if (state.isClosed()) {
+                //NO logged to facebook
+            }
+        }
+    }
 	
 	//GOOGLE METHODS
 	protected void onStart() {
@@ -374,7 +379,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity_main, menu);
+		getMenuInflater().inflate(R.menu.main_activity_blank_fragment_borrar, menu);
 		return true;
 	}
 	/**
@@ -384,9 +389,19 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.btnGplus:
-			// Sign in button clicked
-		   progressDialog.show();
+			// Signin with Google Plus button clicked
+			progressDialog.show();
 			signInWithGplus();
+			break;
+		/* NOTE: Facebook have a custom button!
+		case R.id.btn_facebook_sign_in:
+			// Signin with Twitter button clicked
+			loginToFacebook();
+			break;*/	
+		case R.id.btnTwitter:
+			// Signin with Twitter button clicked
+			progressDialog.show();
+			loginToTwitter();
 			break;
 		}
 	}
@@ -436,81 +451,13 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 					});
 		}
 	}
-	//LOGIN FACEBOOK
-	/**
-	 * Function to login into facebook
-	 * */
-	@SuppressWarnings("deprecation")
-	public void loginToFacebook() {
-       
-		mPrefs = getPreferences(MODE_PRIVATE);
-		String access_token = mPrefs.getString("access_token", null);
-		long expires = mPrefs.getLong("access_expires", 0);
-		//If we have been logged before set the access token and expires
-        
-		if (access_token != null) {
-			facebook.setAccessToken(access_token);
 
-			Log.d("FB Sessions", "" + facebook.isSessionValid());
-		}
 
-		if (expires != 0) {
-			facebook.setAccessExpires(expires);
-		}
-        //Check if session is really valid
-		if (!facebook.isSessionValid()) {
-			facebook.authorize(this,
-					new String[] { "email", "publish_stream" },
-					new DialogListener() {
-
-						@Override
-						public void onCancel() {
-							// Function to handle cancel event
-						}
-
-						@Override
-						public void onComplete(Bundle values) {
-							// Function to handle complete event
-							// Edit Preferences and update facebook acess_token
-							SharedPreferences.Editor editor = mPrefs.edit();
-							editor.putString("access_token",
-									facebook.getAccessToken());
-							editor.putLong("access_expires",
-									facebook.getAccessExpires());
-							editor.commit();
-							//Actions when login finish on facebook
-							Toast.makeText(context,"User connected to Facebook", Toast.LENGTH_LONG).show();
-							//LET'S GO TO ANOTHER ACTIVITY
-							Intent loginFace = new Intent (LoginActivity.this,MainActivityDrawer.class);
-							startActivityForResult(loginFace,FACE_REQUEST);
-						}
-
-						@Override
-						public void onError(DialogError error) {
-							// Function to handle error
-
-						}
-
-						@Override
-						public void onFacebookError(FacebookError fberror) {
-							// Function to handle Facebook errors
-
-						}
-
-					});
-		}else{
-			//If we have been logged before and session is valid
-			Toast.makeText(context,"User connected to Facebook", Toast.LENGTH_LONG).show();
-			//LET'S GO TO ANOTHER ACTIVITY
-			Intent loginFace = new Intent (LoginActivity.this,MainActivityDrawer.class);
-			startActivityForResult(loginFace,FACE_REQUEST);
-		}
-		
-	}
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		     super.onActivityResult(requestCode, resultCode, data);
+		   //Facebook:
+			uiHelper.onActivityResult(requestCode, resultCode, data);
 		      Log.d("Logout","llegamos a onactivityresult ");
 		     //Default value not revoke
 		     boolean revoke = false;
@@ -535,9 +482,30 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		    		if(extras!=null){
 		    			revoke =extras.getBoolean(BaseUtils.REVOKE);
 		    		}
-		    	}
-		     //IF FACEBOOK CALL LOGOUT
-			 logoutFromFacebook(this,revoke);
+		    	
+		    	Session session = Session.getActiveSession();
+		    	if (revoke == true) {
+		    		progressDialog = ProgressDialog.show(
+				            LoginActivity.this, "", "Revoke permission...", true);
+		    		new Request(
+							   session,
+							    "/me/permissions",
+							    null,
+							    HttpMethod.DELETE,
+							    new Request.Callback() {
+							        public void onCompleted(Response response) {
+							            /* handle the result */
+							        	progressDialog.dismiss(); 
+							        }
+							    }
+							).executeAsync();
+					session.closeAndClearTokenInformation();
+				//If we don want to revoke	
+		    	}else {
+									
+					session.closeAndClearTokenInformation();
+				}
+		   }	
 			 break;
 		    case TWITTER_REQUEST :
 		    	//IF TWITTER CALL LOGOUT
@@ -566,11 +534,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		    	}
 		  
 		}
-		//for facebook
-		
-		facebook.authorizeCallback(requestCode, resultCode, data);
 	}
-	//END LOGIN FACEBOOK
 
 	/**
 	 * Function to login twitter
@@ -638,7 +602,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		  e.remove(PREF_KEY_OAUTH_SECRET);
 		  e.remove(PREF_KEY_TWITTER_LOGIN); 
 		  e.commit();
-		  
+		  Toast.makeText(context,"User disconnected from Twitter", Toast.LENGTH_LONG).show();
 		 }else{
 		//If we don't want to revoke remove login status
 		 Editor e = mSharedPreferences.edit();
@@ -657,59 +621,68 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		return mSharedPreferences.getBoolean(PREF_KEY_TWITTER_LOGIN, false);
 	}
 
-	protected  void onResume() {
-		super.onResume();
-		
-		
-	}
-	/**
-	 * 
-	 * NEW LOGOUT FROM FACEBOOK
-	 */
-	public void logoutFromFacebook(Context context,boolean revoke) {
-	    Session session = Session.getActiveSession();
-	   Log.d("Logout","logout facebook");
-	    //Normally Dont pass through this if
-	    if (session != null) {
-	    	Log.d("Logout","Pasa el if de session : "+session);
-	    	//We change if  if(!session.isclosed)
-	        if (session.isClosed()) {
-	        	Log.d("Logout","Pasa el if de session is closed"+session.isClosed());
-	        	session.closeAndClearTokenInformation();
-	        	//IF WE WANT TO REVOKE
-	        	if(revoke){
-	        		Log.d("Logout","Pasa el if de revoke");
-	            //CLEAR FACEBOOK PREFERENCES
-	             SharedPreferences.Editor editor = mPrefs.edit();
-	    		 editor.remove("access_token");
-	    		 editor.remove("access_expires");
-	    		 editor.commit();
-	        	}
-	      }
-	    } else {
-	    	Log.d("Logout","llega al else");
-	    	//Normally it comes here..
-	        session = new Session(context);
-	        Session.setActiveSession(session);
+	@Override
+    public void onResume() {
+        super.onResume();
+        uiHelper.onResume();
+        isResumed = true;
 
-	        session.closeAndClearTokenInformation();
-	        //IF WE WANT TO REVOKE
-	        if(revoke){
-	        	Log.d("Logout","pasa el if de revoke y limpiamos los token");
-	         //CLEAR FACEBOOK PREFERENCES
-	          SharedPreferences.Editor editor = mPrefs.edit();
-    		  editor.remove("access_token");
-    		  editor.remove("access_expires");
-    		  editor.commit();
-	        }
-	        
-	    }
-	    Log.d("Logout","Refrescamos la pantalla despues de logout facebook");
-		 Toast.makeText(context,"User disconnected from Facebook", Toast.LENGTH_LONG).show();
-		//REFRESH THIS ACTIVITY TO CLEAN DATA
-		Intent refresh = new Intent(context,LoginActivity.class);
-		context.startActivity(refresh);
-	}//END LOGOUT FACEBOOK
+        // Call the 'activateApp' method to log an app event for use in analytics and advertising reporting.  Do so in
+        // the onResume methods of the primary Activities that an app may be launched into.
+        AppEventsLogger.activateApp(this);
+    }
+	@Override
+    public void onPause() {
+        super.onPause();
+        uiHelper.onPause();
+        isResumed = false;
+
+        // Call the 'deactivateApp' method to log an app event for use in analytics and advertising
+        // reporting.  Do so in the onPause methods of the primary Activities that an app may be launched into.
+        AppEventsLogger.deactivateApp(this);
+    }
+	@Override
+    protected void onResumeFragments() {
+		Log.d(TAG,"onResumeFragments!");
+        super.onResumeFragments();
+        Session session = Session.getActiveSession();
+
+        if (session != null && session.isOpened()) {
+            // if the session is already open, try to show the selection fragment
+            
+        	//Login ok
+        	Log.d(TAG,"Login to facebook Ok!");
+        	Intent i = new Intent(LoginActivity.this, MainActivityDrawer.class);
+    		startActivityForResult(i, FACE_REQUEST);
+        	
+            //userSkippedLogin = false;
+        } /*else if (userSkippedLogin) {
+            showFragment(SELECTION, false);
+        }*/ else {
+            // otherwise present the splash screen and ask the user to login, unless the user explicitly skipped.
+        	//showFragment(SPLASH, false);
+        	Log.d(TAG,"Login to facebook not Ok!");
+        }
+    }
+	@Override
+    public void onDestroy() {
+        super.onDestroy();
+        uiHelper.onDestroy();
+    }
+	
+	@Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        uiHelper.onSaveInstanceState(outState);
+
+        //outState.putBoolean(USER_SKIPPED_LOGIN_KEY, userSkippedLogin);
+    }
+	@Override
+	public void onFragmentInteraction(Uri uri) {
+		// TODO Auto-generated method stub
+		// Nothing to do!?
+	}
+
 	
 
 	
