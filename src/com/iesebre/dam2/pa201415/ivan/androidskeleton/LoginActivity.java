@@ -230,12 +230,12 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		 * Verifier
 		 * */
 		
-		Log.d("Logout", "onCreate valor twitter"+isTwitterLoggedInAlready());
+		
 		if (!isTwitterLoggedInAlready()) {
 			
 			//GET THE FUCKING URI FROM SPLASH IF WE ARE REDIRECTED FROM TWITTER
 			Uri uri = getIntent().getData();
-			Log.d("Logout","la uri ="+uri);
+			
 			if (uri != null && uri.toString().startsWith(TWITTER_CALLBACK_URL)) {
 				
 				// oAuth verifier
@@ -270,14 +270,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 					Log.d("Logout", "> " + e.getMessage());
 				}
 			}
-			//IF WE ARE CONNECTED TO TWITTER GO TO DRAWER ACTIVITY
-		}else{
-			Log.d("Logout", "onCreate valor twitter en el else"+isTwitterLoggedInAlready());
-			//STOP PROGRESS DIALOG ACTIVATED ONCLICK LOGIN
-			progressDialog.dismiss();
-            Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
-			startActivityForResult(loginTwitter,TWITTER_REQUEST);
+			
 		}
+	
         
 	}//End of method onCreate
 	
@@ -344,9 +339,9 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		
 		// Update the UI after signin
 		//STOP PROGRESSDIALOG
-		Log.d("Logout","paramos progress google");
+		
 		   progressDialog.dismiss();
-		Log.d("Logout","Tras parar el progress dialog");
+		
 		updateUI(true);		
 		
 
@@ -390,7 +385,6 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		switch (v.getId()) {
 		case R.id.btnGplus:
 			// Sign in button clicked
-			Log.d("Logout","se activa el progress de google");
 		   progressDialog.show();
 			signInWithGplus();
 			break;
@@ -400,7 +394,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * Sign-in into google
 	 * */
 	private void signInWithGplus() {
-		Log.d("Logout","signgoogle");
+		
 		if (!mGoogleApiClient.isConnecting()) {
 			Log.d("Logout","pasa el if");
 			mSignInClicked = true;
@@ -426,8 +420,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * Revoking access from google
 	 * */
 	private void revokeGplusAccess() {
-		Log.d("Logout","revokeGPlus");
-		 Log.d("Logout","revoke google");
+
 		if (mGoogleApiClient.isConnected()) {
 			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
 			Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient)
@@ -449,28 +442,23 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	 * */
 	@SuppressWarnings("deprecation")
 	public void loginToFacebook() {
-        Log.d("Logout","LLegamos al login facebook");
+       
 		mPrefs = getPreferences(MODE_PRIVATE);
 		String access_token = mPrefs.getString("access_token", null);
 		long expires = mPrefs.getLong("access_expires", 0);
 		//If we have been logged before set the access token and expires
         
 		if (access_token != null) {
-			Log.d("Logout","Pasa el if del token"+access_token);
 			facebook.setAccessToken(access_token);
-		//Actions when login
-			Log.d("loginface","login facebook 1");
 
 			Log.d("FB Sessions", "" + facebook.isSessionValid());
 		}
 
 		if (expires != 0) {
-			Log.d("Logout","Pasa el if de expires "+expires);
 			facebook.setAccessExpires(expires);
 		}
         //Check if session is really valid
 		if (!facebook.isSessionValid()) {
-			Log.d("Logout","La sesión ha dado que no es valida");
 			facebook.authorize(this,
 					new String[] { "email", "publish_stream" },
 					new DialogListener() {
@@ -511,7 +499,6 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 
 					});
 		}else{
-			Log.d("Logout","llega al else, la sesión es válida hace el intent a la drawer");
 			//If we have been logged before and session is valid
 			Toast.makeText(context,"User connected to Facebook", Toast.LENGTH_LONG).show();
 			//LET'S GO TO ANOTHER ACTIVITY
@@ -523,17 +510,10 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		     super.onActivityResult(requestCode, resultCode, data);
 		      Log.d("Logout","llegamos a onactivityresult ");
 		     //Default value not revoke
 		     boolean revoke = false;
-		   //IF NULL APP GOES DOWN SO WE NEED TO TEST IT
-		     if(data!=null){
-		        Bundle extras=data.getExtras();
-		          if(extras!=null){
-		        	//GET INTENT DATA EXTRAS  
-		    	  revoke = data.getBooleanExtra(BaseUtils.REVOKE,false);
-		          }
-		     }
 		//For google
 		if (requestCode == RC_SIGN_IN) {
 			if (resultCode != RESULT_OK) {
@@ -547,18 +527,36 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			}
 		}
 		//logout 
-		if(resultCode==9999){
+		
 		  switch (requestCode) {
 		    case FACE_REQUEST :
+		    	if(resultCode==RESULT_OK){
+		    		Bundle extras = data.getExtras();
+		    		if(extras!=null){
+		    			revoke =extras.getBoolean(BaseUtils.REVOKE);
+		    		}
+		    	}
 		     //IF FACEBOOK CALL LOGOUT
 			 logoutFromFacebook(this,revoke);
 			 break;
 		    case TWITTER_REQUEST :
 		    	//IF TWITTER CALL LOGOUT
-		    	 Log.d("Logout","antes de llamar al logout de twitter "+isTwitterLoggedInAlready()+","+revoke); 
+		    	 Log.d("Logout","antes de llamar al logout de twitter "+isTwitterLoggedInAlready()+","+revoke);
+		    		if(resultCode==RESULT_OK){
+			    		Bundle extras = data.getExtras();
+			    		if(extras!=null){
+			    			revoke =extras.getBoolean(BaseUtils.REVOKE);
+			    		}
+			    	}
 		          logoutFromTwitter(revoke);
 		    		break;
-		    case GOOGLE_REQUEST :
+		    case GOOGLE_REQUEST:
+		    	if(resultCode==RESULT_OK){
+		    		Bundle extras = data.getExtras();
+		    		if(extras!=null){
+		    			revoke =extras.getBoolean(BaseUtils.REVOKE);
+		    		}
+		    	}
 		    	//IF GOOGLE+ CALL LOGOUT OR REVOKE
 		    	if(revoke){
 		    	 revokeGplusAccess();
@@ -566,10 +564,10 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		    	signOutFromGplus();
 		    	
 		    	}
-		  }
+		  
 		}
 		//for facebook
-		super.onActivityResult(requestCode, resultCode, data);
+		
 		facebook.authorizeCallback(requestCode, resultCode, data);
 	}
 	//END LOGIN FACEBOOK
@@ -616,7 +614,7 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 			 //INTENT TO GO TO DRAWER ACTIVITY IF WE HAVE LOGGED IN ONCE BEFORE
 	            Intent stillLogged = new Intent(LoginActivity.this,MainActivityDrawer.class);
 		        startActivityForResult(stillLogged,TWITTER_REQUEST);
-		        this.finish(); 
+		  
 	    }
 		}
 	        
@@ -641,12 +639,13 @@ public class LoginActivity extends Activity implements OnClickListener,Connectio
 		  e.remove(PREF_KEY_TWITTER_LOGIN); 
 		  e.commit();
 		  
-		 }
+		 }else{
 		//If we don't want to revoke remove login status
 		 Editor e = mSharedPreferences.edit();
 		 e.remove(PREF_KEY_TWITTER_LOGIN); 
 		 e.commit();
 		 Toast.makeText(context,"User disconnected from Twitter", Toast.LENGTH_LONG).show();
+		 }
 		}
 
 	/**

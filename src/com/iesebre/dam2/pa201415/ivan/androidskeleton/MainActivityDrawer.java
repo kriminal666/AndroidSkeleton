@@ -117,12 +117,13 @@ public class MainActivityDrawer extends ActionBarActivity implements
 		  Intent logOutAll = new Intent();
 		  Log.d("Logout","tras declarar el intent");
            //LET'S GO TO LOGOUT
+		  if(revoke==true){
 		  logOutAll.putExtra(BaseUtils.REVOKE,revoke);
+		  }
 		  Log.d("Logout","cargar setresult");
-		  setResult(9999,logOutAll);
+		  setResult(RESULT_OK,logOutAll);
 		  Log.d("Logout","tras cargar result");
 		  finish();
-		  Log.d("Logout","finish");
 	   }
 
 	public void onSectionAttached(int number) {
