@@ -14,6 +14,7 @@
     <string name="remember">Remember</string>
     <string name="user">ENTER USER NAME</string>
     <string name="passwd">ENTER PASSWORD</string>
+    <string name="title_activity_main_activity_blank_fragment_borrar">MainActivityBlankFragmentBorrar</string>
 
     <style name="ButtonText">
         <item name="android:layout_width">fill_parent</item>

@@ -51,8 +51,7 @@ import com.iesebre.dam2.pa201415.ivan.androidskeleton.LoginActivityFragment;
 public class LoginActivity extends FragmentActivity implements
                      OnClickListener,ConnectionCallbacks,OnConnectionFailedListener,LoginActivityFragment.OnFragmentInteractionListener{
 	//BEGIN FACEBOOK
-	// Your Facebook APP ID
-		private static String APP_ID = "714569478638464"; // Replace with your App ID
+		
 		private UiLifecycleHelper uiHelper;
 	    private Session.StatusCallback callback = new Session.StatusCallback() {
 	        @Override
@@ -64,7 +63,7 @@ public class LoginActivity extends FragmentActivity implements
 	    private boolean isResumed = false;
 	
 
-		private static final int FACE_REQUEST = 78452301;
+		private static final int FACE_REQUEST = 92;
 		
 		//END FACEBOOK CAMPS
 	
@@ -83,7 +82,7 @@ public class LoginActivity extends FragmentActivity implements
 	static final String PREF_KEY_OAUTH_SECRET = "oauth_token_secret";
 	static final String PREF_KEY_TWITTER_LOGIN = "isTwitterLogedIn";
     //TWITTER REQUEST
-	private static final int TWITTER_REQUEST = 789012;
+	private static final int TWITTER_REQUEST = 91;
 	static final String TWITTER_CALLBACK_URL = "oauth://t4jsample";
 
 	// Twitter oauth urls
@@ -129,7 +128,7 @@ public class LoginActivity extends FragmentActivity implements
 	//private SignInButton btnSignIn;
 	
 	//GOOGLE REQUEST
-	private static final int GOOGLE_REQUEST = 98702341;
+	private static final int GOOGLE_REQUEST = 90;
 
 	private static final int DIALOG_PLAY_SERVICES_ERROR = 91;
 	//END GOOGLE CAMPS
@@ -246,9 +245,12 @@ public class LoginActivity extends FragmentActivity implements
 				
 					 //AQUI ACCIONES PARA HACER SI HAY UN LOGIN
 					  progressDialog.dismiss();
+					  Log.d("Logout","Antes del toast y el intent");
 					Toast.makeText(context,"User connected to Twitter", Toast.LENGTH_LONG).show();
+			
                     Intent loginTwitter = new Intent(LoginActivity.this,MainActivityDrawer.class);
-					startActivityForResult(loginTwitter,TWITTER_REQUEST);	
+					startActivityForResult(loginTwitter,TWITTER_REQUEST);
+					Log.d("Logout","Después del intent");
 				} catch (Exception e) {
 					// Check log for login errors
 					Log.d("Logout", "> " + e.getMessage());
@@ -272,7 +274,7 @@ public class LoginActivity extends FragmentActivity implements
             // check for the OPENED state instead of session.isOpened() since for the
             // OPENED_TOKEN_UPDATED state, the selection fragment should already be showing.
             if (state.equals(SessionState.OPENED)) {
-            	
+            	Toast.makeText(context,"User connected to Facebook", Toast.LENGTH_LONG).show();
             	Intent i = new Intent(LoginActivity.this, MainActivityDrawer.class);
         		startActivityForResult(i, FACE_REQUEST);
             } else if (state.isClosed()) {
@@ -371,7 +373,7 @@ public class LoginActivity extends FragmentActivity implements
 	}
 	@Override
 	public void onConnectionSuspended(int arg0) {
-		
+		progressDialog.dismiss();
 		mGoogleApiClient.connect();
 		updateUI(false);
 	}
@@ -500,9 +502,10 @@ public class LoginActivity extends FragmentActivity implements
 							    }
 							).executeAsync();
 					session.closeAndClearTokenInformation();
+					Toast.makeText(context,"Revoked Facebook permissions", Toast.LENGTH_LONG).show();
 				//If we don want to revoke	
 		    	}else {
-									
+		    		Toast.makeText(context,"User disconected from facebook", Toast.LENGTH_LONG).show();				
 					session.closeAndClearTokenInformation();
 				}
 		   }	
@@ -652,6 +655,7 @@ public class LoginActivity extends FragmentActivity implements
             
         	//Login ok
         	Log.d(TAG,"Login to facebook Ok!");
+        	Toast.makeText(context,"User connected to Facebook", Toast.LENGTH_LONG).show();
         	Intent i = new Intent(LoginActivity.this, MainActivityDrawer.class);
     		startActivityForResult(i, FACE_REQUEST);
         	
